@@ -11,7 +11,10 @@ import {
   User,
   Edit2,
   PlusCircle,
-  XCircle
+  XCircle,
+  Lock,
+  KeyRound,
+  LogOut
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { supabase } from '../lib/supabase';
@@ -32,9 +35,47 @@ export function PanelCreador() {
 
   const categories = ['Diabetes', 'Hipertensión', 'Obesidad', 'General'];
 
+  // Auth States
+  const [user, setUser] = useState<any>(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+
   useEffect(() => {
-    fetchRecentPosts();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setAuthChecked(true);
+    });
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session) fetchRecentPosts();
+    });
+    
+    return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (user) fetchRecentPosts();
+  }, [user]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsLoggingIn(true);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+    } catch (err: any) {
+      alert(`Error de acceso: ${err.message}`);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
 
   const fetchRecentPosts = async () => {
     try {
@@ -66,7 +107,7 @@ export function PanelCreador() {
 
       const { error: uploadError } = await supabase.storage
         .from('Publicaciones')
-        .upload(filePath, file);
+        .upload(filePath, file, { cacheControl: '3600', upsert: true });
 
       if (uploadError) throw uploadError;
 
@@ -75,9 +116,9 @@ export function PanelCreador() {
         .getPublicUrl(filePath);
 
       setUploadedUrl(publicUrl);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error uploading:', err);
-      alert('Error al subir el archivo');
+      alert(`Error al subir (${err.message || 'Error de conexión'}). Asegúrate de tener el Bucket "Publicaciones" creado en Supabase con políticas públicas de inserción.`);
     } finally {
       setIsUploading(false);
     }
@@ -154,10 +195,92 @@ export function PanelCreador() {
     }
   };
 
+  if (!authChecked) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-8">
+        <Loader2 className="w-10 h-10 text-[#246b38] animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-[80vh] flex flex-col items-center justify-center p-8 animate-fade-in-up">
+        <div className="w-full max-w-md bg-white rounded-[3rem] border border-gray-100 shadow-2xl p-12 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#e0efd5]/50 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#246b38]/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+          
+          <div className="relative">
+            <div className="w-20 h-20 bg-[#e0efd5] rounded-[2rem] flex items-center justify-center mb-8 mx-auto">
+               <Lock className="w-10 h-10 text-[#246b38]" />
+            </div>
+            
+            <h1 className="text-3xl font-black text-[#1a1a1a] text-center mb-4 tracking-tighter">Acceso Reservado</h1>
+            <p className="text-gray-500 text-center mb-10 text-sm font-medium">Ingresa tus credenciales para gestionar el contenido de Nutriconfianza.</p>
+            
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Email</label>
+                <div className="relative">
+                  <input 
+                    type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    placeholder="admin@nutriconfianza.com"
+                    className="w-full bg-gray-50 border-none rounded-2xl p-5 pl-12 focus:ring-2 focus:ring-[#246b38]/20 transition-all font-bold"
+                  />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Contraseña</label>
+                <div className="relative">
+                  <input 
+                    type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    className="w-full bg-gray-50 border-none rounded-2xl p-5 pl-12 focus:ring-2 focus:ring-[#246b38]/20 transition-all font-bold"
+                  />
+                  <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                </div>
+              </div>
+
+              <button 
+                type="submit"
+                disabled={isLoggingIn}
+                className={cn(
+                  "w-full py-6 rounded-3xl font-bold transition-all shadow-xl shadow-[#246b38]/20 flex items-center justify-center gap-3",
+                  isLoggingIn ? "bg-gray-100 text-gray-400" : "bg-[#246b38] hover:bg-[#1a4d2e] text-white"
+                )}
+              >
+                {isLoggingIn ? <Loader2 className="w-5 h-5 animate-spin" /> : "Entrar al Panel"}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="py-12 bg-[#fdfdfd] animate-fade-in-up">
       <div className="mb-12 flex justify-between items-end">
         <div>
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#246b38] bg-[#e0efd5] px-3 py-1 rounded-full">
+               Sesión Activa
+            </span>
+            <button 
+              onClick={handleLogout}
+              className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-rose-600 transition-colors flex items-center gap-1"
+            >
+               <LogOut className="w-3 h-3" /> Cerrar Sesión
+            </button>
+          </div>
           <h1 className="text-5xl font-black text-[#1a1a1a] mb-4 tracking-tighter">
             {editId ? 'Editando Contenido' : 'Panel de Creador'}
           </h1>

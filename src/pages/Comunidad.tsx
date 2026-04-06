@@ -61,6 +61,19 @@ export function Comunidad() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Fetch posts from Supabase on mount
   useEffect(() => {
@@ -179,7 +192,13 @@ export function Comunidad() {
           </p>
         </div>
         <button
-          onClick={() => setIsEditorOpen(true)}
+          onClick={() => {
+            if (!user) {
+              alert('Debes iniciar sesión para publicar en la comunidad.');
+              return;
+            }
+            setIsEditorOpen(true);
+          }}
           className="w-full md:w-auto bg-[#246b38] hover:bg-[#1a4d2e] text-white px-8 py-5 rounded-[2rem] font-bold flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#246b38]/20"
         >
           <Plus className="w-6 h-6" /> Nueva publicación

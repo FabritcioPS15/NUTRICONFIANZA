@@ -32,7 +32,7 @@ export function Editor({ onClose, onPost }: EditorProps) {
 
       const { error: uploadError } = await supabase.storage
         .from('Publicaciones')
-        .upload(filePath, file);
+        .upload(filePath, file, { cacheControl: '3600', upsert: true });
 
       if (uploadError) {
         throw uploadError;
@@ -45,9 +45,9 @@ export function Editor({ onClose, onPost }: EditorProps) {
       setUploadedUrl(publicUrl);
       setFileType(file.type.startsWith('video/') ? 'video' : 'image');
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading file:', error);
-      alert('Error al subir el archivo. Por favor, intenta de nuevo.');
+      alert(`Error al subir el archivo (${error.message}). Revisa si el Bucket "Publicaciones" existe y es público.`);
     } finally {
       setIsUploading(false);
     }
