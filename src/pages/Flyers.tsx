@@ -81,12 +81,12 @@ export function Flyers() {
 
   return (
     <div className="py-8 space-y-12 animate-fade-in-up">
-      <div className="max-w-2xl">
-        <h1 className="text-5xl font-bold text-[#1a1a1a] leading-tight mb-4 tracking-tight">
-          Conocimiento Visual<br />para tu <span className="text-[#3b8751] italic font-semibold">Bienestar.</span>
+      <div className="max-w-3xl">
+        <h1 className="text-4xl md:text-7xl font-black text-[#1a1a1a] leading-[1.1] mb-6 tracking-tighter">
+          Conocimiento Visual<br />para tu <span className="text-[#3b8751] italic font-medium">Bienestar.</span>
         </h1>
-        <p className="text-gray-600 leading-relaxed text-lg">
-          Descubre nuestra biblioteca de infografías diseñadas por expertos. Información veraz para llevar contigo.
+        <p className="text-gray-500 font-medium leading-relaxed text-base md:text-xl">
+          Descubre nuestra biblioteca de infografías diseñadas por expertos. Información veraz para llevar contigo siempre.
         </p>
       </div>
 
@@ -131,7 +131,7 @@ export function Flyers() {
                    </div>
                 </div>
               </div>
-              <div className="p-10 flex items-center justify-between flex-1">
+              <div className="p-6 md:p-10 flex items-center justify-between flex-1">
                 <div className="max-w-md">
                   <p className="text-[#246b38] text-[10px] font-black uppercase tracking-widest mb-3 bg-[#e0efd5] px-3 py-1 rounded-lg w-max">
                     {flyersList[0].tag}
@@ -172,7 +172,7 @@ export function Flyers() {
                       <Bookmark className={cn("w-5 h-5", savedIds.includes(String(flyer.id)) ? "fill-current" : "")} />
                    </button>
                 </div>
-                <div className="p-8 flex flex-col flex-1">
+                <div className="p-6 md:p-8 flex flex-col flex-1">
                    <div className="mb-4">
                      <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">{flyer.tag}</span>
                      <h3 className="text-xl font-bold text-[#1a1a1a] mt-1">{flyer.title}</h3>

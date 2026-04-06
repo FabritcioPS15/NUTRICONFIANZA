@@ -169,20 +169,20 @@ export function Comunidad() {
 
       {/* ... (rest of the UI remains the same) ... */}
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-        <div>
-          <h1 className="text-4xl font-bold text-[#1a1a1a] leading-tight mb-2 tracking-tight">
-            Nuestro Espacio de<br />Bienestar
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
+        <div className="text-center md:text-left">
+          <h1 className="text-4xl md:text-7xl font-black text-[#1a1a1a] leading-tight mb-4 tracking-tighter">
+            Nuestro Espacio de<br className="hidden md:block" /> Bienestar
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-500 font-medium leading-relaxed">
             Un lugar para compartir experiencias, aprender juntos y construir<br className="hidden md:block" /> hábitos saludables con el apoyo de la comunidad.
           </p>
         </div>
         <button
           onClick={() => setIsEditorOpen(true)}
-          className="bg-[#2a5934] hover:bg-[#1a4d2e] text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-green-900/10"
+          className="w-full md:w-auto bg-[#246b38] hover:bg-[#1a4d2e] text-white px-8 py-5 rounded-[2rem] font-bold flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#246b38]/20"
         >
-          <Plus className="w-5 h-5" /> Nueva publicación
+          <Plus className="w-6 h-6" /> Nueva publicación
         </button>
       </div>
 

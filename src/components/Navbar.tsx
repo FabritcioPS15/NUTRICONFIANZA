@@ -72,7 +72,7 @@ export function Navbar() {
           <Link 
             to="/guardados" 
             className={cn(
-              "p-3 rounded-2xl transition-all relative group hidden md:flex",
+              "p-3 rounded-2xl transition-all relative group",
               location.pathname === '/guardados' ? "bg-rose-50 text-rose-500" : "bg-gray-100/50 text-gray-400 hover:bg-rose-50 hover:text-rose-500"
             )}
           >
@@ -82,7 +82,7 @@ export function Navbar() {
           <Link 
             to="/perfil" 
             className={cn(
-              "p-3 rounded-2xl transition-all group",
+              "p-3 rounded-2xl transition-all group hidden md:flex",
               location.pathname === '/perfil' ? "bg-[#e0efd5] text-[#246b38]" : "bg-gray-100/50 text-gray-400 hover:bg-[#e0efd5] hover:text-[#246b38]"
             )}
           >

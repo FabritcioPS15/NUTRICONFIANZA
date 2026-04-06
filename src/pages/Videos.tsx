@@ -113,14 +113,14 @@ export function Videos() {
         ))}
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-12">
+      <div className="flex flex-col lg:flex-row gap-8 md:gap-12">
         {/* Sidebar */}
-        <div className="w-full lg:w-72 flex-shrink-0 space-y-8">
+        <div className="w-full lg:w-72 flex-shrink-0 space-y-6 md:space-y-8">
           <div>
-            <h1 className="text-4xl font-bold text-[#246b38] leading-tight mb-4">
+            <h1 className="text-3xl md:text-6xl font-black text-[#246b38] leading-tight mb-4 tracking-tighter">
               Curaduría de Bienestar
             </h1>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-500 font-medium leading-relaxed">
               Videos educativos para tu salud. Reproduce contenido experto sin salir de la plataforma.
             </p>
           </div>
@@ -153,14 +153,14 @@ export function Videos() {
                   </div>
                 </div>
                 
-                <div className="p-8">
-                  <div className="flex justify-between items-start mb-4">
+                <div className="p-6 md:p-8">
+                  <div className="flex flex-col md:flex-row justify-between items-start mb-4 gap-4">
                     <div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-[#246b38] bg-[#e0efd5] px-3 py-1 rounded-lg mb-3 inline-block">
+                      <span className="text-[9px] font-black uppercase tracking-widest text-[#246b38] bg-[#e0efd5] px-3 py-1 rounded-lg mb-3 inline-block">
                         {video.category}
                       </span>
-                      <h2 className="text-2xl font-bold text-[#1a1a1a] mb-2">{video.title}</h2>
-                      <p className="text-gray-500 text-sm">{video.desc}</p>
+                      <h2 className="text-xl md:text-2xl font-black text-[#1a1a1a] mb-2 leading-tight">{video.title}</h2>
+                      <p className="text-gray-500 text-sm font-medium">{video.desc}</p>
                     </div>
                     <div className="flex gap-2">
                        <button 
