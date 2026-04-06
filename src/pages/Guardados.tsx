@@ -6,13 +6,15 @@ import {
   Play,
   X,
   Download,
-  Eye
+  Eye,
+  ChevronDown
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { supabase } from '../lib/supabase';
 
 export function Guardados() {
   const [activeTab, setActiveTab] = useState('Todos');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const tabs = ['Todos', 'Videos', 'Flyers'];
   const [savedItems, setSavedItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,33 +80,55 @@ export function Guardados() {
     <div className="py-12 bg-[#fdfdfd] animate-fade-in-up min-h-screen">
       <div className="flex flex-col md:flex-row justify-between items-start mb-16 gap-8">
         <div>
-          <h1 className="text-5xl font-black text-[#1a1a1a] mb-4 tracking-tighter flex items-center gap-4">
+          <h1 className="text-4xl md:text-5xl font-black text-[#1a1a1a] mb-4 tracking-tighter flex items-center gap-4">
             <div className="p-3 bg-[#e0efd5] rounded-2xl">
                <Bookmark className="w-10 h-10 text-[#2a5934] fill-current" />
             </div>
             Biblioteca Personal
           </h1>
-          <p className="text-gray-500 text-lg max-w-lg leading-relaxed font-medium">
+          <p className="text-gray-500 text-base md:text-lg max-w-lg leading-relaxed font-medium">
             Tu colección curada de contenido experto. Los recursos que necesitas para tu bienestar, siempre a mano.
           </p>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="bg-gray-100/80 p-1.5 rounded-[2rem] flex items-center gap-1 shadow-inner">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={cn(
-                "px-10 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all",
-                activeTab === tab 
-                  ? "bg-[#246b38] text-white shadow-lg" 
-                  : "text-gray-400 hover:text-gray-600"
-              )}
-            >
-              {tab}
-            </button>
-          ))}
+        {/* Dropdown Filter */}
+        <div className="relative group min-w-[240px] z-50">
+          <button 
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center gap-4 bg-white border-2 border-gray-100 px-8 py-4 rounded-[2rem] font-black text-xs uppercase tracking-widest text-[#1a1a1a] shadow-sm hover:border-[#246b38]/30 transition-all active:scale-95 w-full justify-between"
+          >
+            <div className="flex items-center gap-3">
+               <div className="w-2 h-2 rounded-full bg-[#246b38]" />
+               Ver: {activeTab}
+            </div>
+            <ChevronDown className={cn("w-5 h-5 text-[#246b38] transition-transform", isDropdownOpen && "rotate-180")} />
+          </button>
+          
+          {isDropdownOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
+              <div className="absolute top-full left-0 right-0 mt-3 bg-white/95 backdrop-blur-3xl border-2 border-gray-100 rounded-[2rem] overflow-hidden shadow-2xl z-20 p-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => {
+                      setActiveTab(tab);
+                      setIsDropdownOpen(false);
+                    }}
+                    className={cn(
+                      "w-full text-left px-8 py-4 rounded-[1.5rem] text-xs font-black uppercase tracking-widest transition-all flex items-center justify-between group/item",
+                      activeTab === tab 
+                        ? "bg-[#246b38] text-white shadow-xl shadow-[#246b38]/20" 
+                        : "text-gray-500 hover:bg-[#e0efd5] hover:text-[#246b38]"
+                    )}
+                  >
+                    {tab}
+                    {activeTab === tab && <div className="w-2 h-2 bg-white rounded-full" />}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import { Download, Bookmark, Eye, Loader2, X } from 'lucide-react';
+import { Download, Bookmark, Eye, Loader2, X, ChevronDown, ArrowUp } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useState, useEffect } from 'react';
 import { Flyer } from '../types';
@@ -19,13 +19,23 @@ const INITIAL_FLYERS: Flyer[] = [
 export function Flyers() {
   const filters = ['Todos los Temas', 'Diabetes', 'Hipertensión', 'Obesidad', 'General'];
   const [selectedFilter, setSelectedFilter] = useState('Todos los Temas');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [flyersList, setFlyersList] = useState<Flyer[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewingFlyer, setViewingFlyer] = useState<Flyer | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const [savedIds, setSavedIds] = useState<string[]>(() => {
     const saved = localStorage.getItem('nutriconfianza_saved_flyers');
     return saved ? JSON.parse(saved) : [];
   });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     fetchFlyers();
@@ -80,114 +90,145 @@ export function Flyers() {
   };
 
   return (
-    <div className="py-8 space-y-12 animate-fade-in-up">
-      <div className="max-w-3xl">
-        <h1 className="text-4xl md:text-7xl font-black text-[#1a1a1a] leading-[1.1] mb-6 tracking-tighter">
-          Conocimiento Visual<br />para tu <span className="text-[#3b8751] italic font-medium">Bienestar.</span>
-        </h1>
-        <p className="text-gray-500 font-medium leading-relaxed text-base md:text-xl">
-          Descubre nuestra biblioteca de infografías diseñadas por expertos. Información veraz para llevar contigo siempre.
-        </p>
-      </div>
+    <div className="py-8 animate-fade-in-up">
+      <div className="flex flex-col lg:flex-row gap-12 relative">
+        {/* Sidebar - Desktop Filters */}
+        <div className="w-full lg:w-[320px] flex-shrink-0 space-y-12 lg:sticky lg:top-24 h-fit">
+          <div>
+            <h1 className="text-4xl md:text-6xl font-black text-[#1a1a1a] leading-tight mb-6 tracking-tighter">
+               Conocimiento <br /><span className="text-[#3b8751] italic font-medium">Visual.</span>
+            </h1>
+            <p className="text-gray-500 font-medium leading-relaxed mb-10">
+               Descubre nuestra biblioteca de infografías diseñadas por expertos. Información veraz para llevar contigo siempre.
+            </p>
 
-      <div className="flex flex-wrap items-center gap-3 border-y border-gray-100 py-6">
-        <span className="text-xs font-black text-gray-400 uppercase tracking-widest mr-4">Filtrar:</span>
-        {filters.map((filter) => (
-          <button
-            key={filter}
-            onClick={() => setSelectedFilter(filter)}
-            className={cn(
-              "px-6 py-2 rounded-2xl text-xs font-bold transition-all",
-              selectedFilter === filter 
-                ? "bg-[#246b38] text-white shadow-lg shadow-[#246b38]/20" 
-                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-            )}
-          >
-            {filter}
-          </button>
-        ))}
-      </div>
-
-      {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 text-[#246b38] animate-spin" /></div>
-      ) : flyersList.length === 0 ? (
-        <div className="text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
-           <p className="text-gray-400 font-medium">Buscando más recursos...</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Featured Flyer */}
-          {flyersList.length > 0 && (
-            <div className="lg:col-span-2 bg-[#f8f9fa] rounded-[3rem] overflow-hidden border border-gray-100 shadow-sm flex flex-col group relative">
-              <div className="h-80 bg-slate-800 relative overflow-hidden cursor-pointer" onClick={() => setViewingFlyer(flyersList[0])}>
-                <img 
-                  src={flyersList[0].img} 
-                  className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700" 
-                  alt={flyersList[0].title}
-                />
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                   <div className="bg-white/90 p-4 rounded-full shadow-2xl">
-                     <Eye className="w-8 h-8 text-[#1a1a1a]" />
-                   </div>
-                </div>
-              </div>
-              <div className="p-6 md:p-10 flex items-center justify-between flex-1">
-                <div className="max-w-md">
-                  <p className="text-[#246b38] text-[10px] font-black uppercase tracking-widest mb-3 bg-[#e0efd5] px-3 py-1 rounded-lg w-max">
-                    {flyersList[0].tag}
-                  </p>
-                  <h3 className="text-3xl font-bold text-[#1a1a1a] mb-3">{flyersList[0].title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{flyersList[0].desc}</p>
-                </div>
-                <div className="flex gap-3">
-                  <button 
-                    onClick={() => toggleSave(String(flyersList[0].id))}
+            {/* Desktop Vertical Menu */}
+            <div className="hidden lg:flex flex-col gap-3">
+               <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">Temas de Interés</h3>
+               {filters.map((filter) => {
+                 const isActive = selectedFilter === filter;
+                 return (
+                   <button
+                    key={filter}
+                    onClick={() => setSelectedFilter(filter)}
                     className={cn(
-                      "w-14 h-14 transition-all rounded-3xl flex items-center justify-center shadow-sm", 
-                      savedIds.includes(String(flyersList[0].id)) ? "bg-[#246b38] text-white" : "bg-white text-gray-400 hover:bg-gray-50 border border-gray-100"
+                      "group flex flex-col p-5 rounded-[2rem] transition-all border-2 text-left relative overflow-hidden",
+                      isActive 
+                        ? "bg-[#246b38] border-[#246b38] text-white shadow-xl shadow-[#246b38]/20" 
+                        : "bg-white border-gray-50 text-gray-400 hover:border-[#246b38]/20 hover:text-[#246b38]"
                     )}
-                  >
-                    <Bookmark className={cn("w-6 h-6", savedIds.includes(String(flyersList[0].id)) ? "fill-current" : "")} />
-                  </button>
-                </div>
-              </div>
+                   >
+                     <div className="flex items-center justify-between z-10">
+                       <span className="font-black text-sm uppercase tracking-widest">{filter}</span>
+                       <div className={cn("w-1.5 h-1.5 rounded-full transition-all", isActive ? "bg-white scale-150" : "bg-gray-200 group-hover:bg-[#246b38]")} />
+                     </div>
+                     {isActive && <div className="absolute top-0 left-0 w-1.5 h-full bg-white opacity-50" />}
+                   </button>
+                 );
+               })}
             </div>
-          )}
+          </div>
 
-          {/* Regular Flyers Grid */}
-          {flyersList.slice(1).map((flyer) => (
-             <div key={flyer.id} className="bg-white rounded-[3rem] overflow-hidden border border-gray-100 shadow-sm flex flex-col group">
-                <div className="h-64 bg-gray-100 relative overflow-hidden cursor-pointer" onClick={() => setViewingFlyer(flyer)}>
-                   <img src={flyer.img} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={flyer.title} />
-                   <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                     <Eye className="w-8 h-8 text-white" />
-                   </div>
-                   <button 
-                     onClick={(e) => { e.stopPropagation(); toggleSave(String(flyer.id)); }}
-                     className={cn(
-                       "absolute top-5 right-5 w-12 h-12 rounded-2xl flex items-center justify-center backdrop-blur-md transition-all shadow-lg", 
-                       savedIds.includes(String(flyer.id)) ? "bg-[#246b38] text-white" : "bg-white/80 text-gray-600 hover:bg-white"
-                     )}
-                   >
-                      <Bookmark className={cn("w-5 h-5", savedIds.includes(String(flyer.id)) ? "fill-current" : "")} />
-                   </button>
+          <div className="bg-[#f8f9fa] p-8 rounded-[3rem] border border-gray-100">
+             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-4">Recurso Premium</span>
+             <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
+                   <Download className="w-5 h-5 text-[#246b38]" />
                 </div>
-                <div className="p-6 md:p-8 flex flex-col flex-1">
-                   <div className="mb-4">
-                     <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">{flyer.tag}</span>
-                     <h3 className="text-xl font-bold text-[#1a1a1a] mt-1">{flyer.title}</h3>
-                   </div>
-                   <button 
-                     onClick={() => setViewingFlyer(flyer)}
-                     className="mt-auto w-full bg-[#1a4d2e] hover:bg-[#123820] text-white py-4 rounded-[1.5rem] font-bold text-sm flex justify-center items-center gap-2 transition-all hover:scale-[1.02]"
-                   >
-                     Ver Recurso
-                   </button>
-                </div>
+                <p className="text-xs font-bold text-gray-600">Todos los PDF están verificados por clínicos.</p>
              </div>
-          ))}
+          </div>
         </div>
-      )}
+
+        {/* Content Area */}
+        <div className="flex-1 space-y-10">
+          {/* Mobile Category Dropdown Filter */}
+          <div className="lg:hidden relative mb-10 z-50">
+            <div className="relative group w-full">
+              <button 
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center gap-3 bg-white border-2 border-gray-100 px-8 py-5 rounded-[2rem] font-black text-sm text-[#1a1a1a] shadow-sm hover:border-[#246b38]/30 transition-all active:scale-95 w-full justify-between"
+              >
+                <div className="flex items-center gap-2">
+                   <div className="w-2.5 h-2.5 rounded-full bg-[#3b8751]" />
+                   Filtrar: {selectedFilter}
+                </div>
+                <ChevronDown className={cn("w-5 h-5 text-[#3b8751] transition-transform", isDropdownOpen && "rotate-180")} />
+              </button>
+              
+              {isDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
+                  <div className="absolute top-full left-0 right-0 mt-3 bg-white/95 backdrop-blur-3xl border-2 border-gray-100 rounded-[2.5rem] overflow-hidden shadow-2xl z-20 p-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    {filters.map((filter) => (
+                      <button
+                        key={filter}
+                        onClick={() => {
+                          setSelectedFilter(filter);
+                          setIsDropdownOpen(false);
+                        }}
+                        className={cn(
+                          "w-full text-left px-8 py-5 rounded-2xl text-sm font-black transition-all flex items-center justify-between group/item",
+                          selectedFilter === filter 
+                            ? "bg-[#246b38] text-white shadow-lg shadow-[#246b38]/20" 
+                            : "text-gray-500 hover:bg-[#e0efd5] hover:text-[#246b38]"
+                        )}
+                      >
+                        {filter}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-12">
+            {loading ? (
+              <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 text-[#246b38] animate-spin" /></div>
+            ) : flyersList.length === 0 ? (
+              <div className="text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
+                 <p className="text-gray-400 font-medium">Buscando más recursos...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Regular Flyers Grid */}
+                {flyersList.map((flyer) => (
+                   <div key={flyer.id} className="bg-white rounded-[3rem] overflow-hidden border border-gray-100 shadow-sm flex flex-col group">
+                      <div className="h-64 bg-gray-100 relative overflow-hidden cursor-pointer" onClick={() => setViewingFlyer(flyer)}>
+                         <img src={flyer.img} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={flyer.title} />
+                         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                           <Eye className="w-8 h-8 text-white" />
+                         </div>
+                         <button 
+                           onClick={(e) => { e.stopPropagation(); toggleSave(String(flyer.id)); }}
+                           className={cn(
+                             "absolute top-5 right-5 w-12 h-12 rounded-2xl flex items-center justify-center backdrop-blur-md transition-all shadow-lg", 
+                             savedIds.includes(String(flyer.id)) ? "bg-[#246b38] text-white" : "bg-white/80 text-gray-600 hover:bg-white"
+                           )}
+                         >
+                            <Bookmark className={cn("w-5 h-5", savedIds.includes(String(flyer.id)) ? "fill-current" : "")} />
+                         </button>
+                      </div>
+                      <div className="p-6 md:p-8 flex flex-col flex-1">
+                         <div className="mb-4">
+                           <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">{flyer.tag}</span>
+                           <h3 className="text-xl font-bold text-[#1a1a1a] mt-1">{flyer.title}</h3>
+                         </div>
+                         <button 
+                           onClick={() => setViewingFlyer(flyer)}
+                           className="mt-auto w-full bg-[#1a4d2e] hover:bg-[#123820] text-white py-4 rounded-[1.5rem] font-bold text-sm flex justify-center items-center gap-2 transition-all hover:scale-[1.02]"
+                         >
+                           Ver Recurso
+                         </button>
+                      </div>
+                   </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Flyer Viewer Modal - Premium Version */}
       {viewingFlyer && (
@@ -258,6 +299,16 @@ export function Flyers() {
             </div>
           </div>
         </div>
+      )}
+      {/* Back to Top */}
+      {showScrollTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-10 right-10 w-14 h-14 bg-[#246b38]/90 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-90 transition-all z-[60] border-4 border-white/20 backdrop-blur-xl animate-in fade-in zoom-in slide-in-from-bottom-5 duration-500"
+          aria-label="Scroll to top"
+        >
+          <ArrowUp className="w-6 h-6 stroke-[3]" />
+        </button>
       )}
     </div>
   );

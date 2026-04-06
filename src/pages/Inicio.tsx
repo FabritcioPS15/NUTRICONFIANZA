@@ -10,10 +10,10 @@ export function Inicio() {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#e0efd5] text-[#246b38] text-[10px] font-black uppercase tracking-[0.2em] mb-2 mx-auto md:mx-0">
              <Leaf className="w-3 h-3" /> Nutrición Basada en Evidencia
           </div>
-          <h1 className="text-5xl md:text-8xl font-black text-[#1a1a1a] tracking-tight leading-[1.1]">
+          <h1 className="text-4xl sm:text-5xl md:text-8xl font-black text-[#1a1a1a] tracking-tight leading-[1.1]">
             NUTRI<span className="text-[#246b38]">CONFIANZA</span>
             <br className="hidden md:block" />
-            <span className="text-gray-400 font-medium text-3xl md:text-5xl italic block mt-2">"Cuida tu salud sin mitos"</span>
+            <span className="text-gray-400 font-medium text-2xl sm:text-3xl md:text-5xl italic block mt-2">"Cuida tu salud sin mitos"</span>
           </h1>
           <p className="text-gray-500 text-base md:text-xl max-w-xl leading-relaxed mx-auto md:mx-0">
             Accede a información curada por expertos, videos educativos y una comunidad que prioriza tu bienestar real. Descubre la nutrición basada en ciencia.
