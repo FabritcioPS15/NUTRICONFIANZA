@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 
 export function Inicio() {
   return (
-    <div className="flex flex-col gap-24 py-12 animate-fade-in-up">
+    <div className="flex flex-col gap-24 py-12">
       {/* Hero Section */}
-      <section className="flex flex-col md:flex-row items-center gap-12 mt-8">
+      <section className="flex flex-col md:flex-row items-center gap-12 mt-8 animate-fade-in-up">
         <div className="flex-1 space-y-8">
           <h1 className="text-6xl font-bold text-[#1a1a1a] tracking-tight leading-tight">
             NUTRICONFIANZA
@@ -45,7 +45,7 @@ export function Inicio() {
       </section>
 
       {/* Acceso Directo */}
-      <section className="space-y-8">
+      <section className="space-y-8 animate-fade-in-up stagger-1 opacity-0 fill-mode-forwards" style={{ animationFillMode: 'forwards' }}>
         <h2 className="text-2xl font-bold text-[#1a1a1a]">Acceso Directo</h2>
         <div className="grid md:grid-cols-3 gap-6">
           <Link to="/videos" className="p-8 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">

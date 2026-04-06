@@ -1,8 +1,9 @@
-import { Plus, Heart, MessageSquare, Share2, MoreHorizontal, Dumbbell, Apple, Activity, Users, Bookmark } from 'lucide-react';
+import { Plus, Heart, MessageSquare, Share2, MoreHorizontal, Dumbbell, Apple, Activity, Users, Bookmark, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { cn } from '../lib/utils';
 import { Editor } from '../components/Editor';
 import { Post } from '../types';
+import { supabase } from '../lib/supabase';
 
 
 const INITIAL_POSTS = [
@@ -45,18 +46,67 @@ const INITIAL_POSTS = [
   }
 ];
 
+const getEmbedUrl = (url: string) => {
+  if (url.includes('youtube.com/watch?v=')) return url.replace('watch?v=', 'embed/');
+  if (url.includes('youtu.be/')) return url.replace('youtu.be/', 'youtube.com/embed/');
+  return url;
+};
+
+const isIframeable = (url: string) => {
+  if (!url) return false;
+  return url.includes('youtube.com') || url.includes('youtu.be') || url.includes('tiktok.com');
+};
+
 export function Comunidad() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [posts, setPosts] = useState<Post[]>(() => {
-    const saved = localStorage.getItem('nutriconfianza_posts');
-    return saved ? JSON.parse(saved) : INITIAL_POSTS;
-  });
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // Fetch posts from Supabase on mount
   useEffect(() => {
-    localStorage.setItem('nutriconfianza_posts', JSON.stringify(posts));
-  }, [posts]);
+    async function fetchPosts() {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('posts')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-  const toggleLike = (id: string | number) => {
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          // Map DB fields to our Post interface
+          const mappedPosts: Post[] = data.map(p => ({
+            id: p.id,
+            user: p.user_name || "Usuario Invitado",
+            time: new Date(p.created_at).toLocaleString(),
+            tag: p.tag || "General",
+            avatar: p.avatar_style || "bg-gray-200",
+            desc: p.description || "",
+            img: p.media_url,
+            mediaType: p.media_type as 'image' | 'video',
+            likes: p.likes_count || 0,
+            comments: p.comments_count || 0,
+            liked: false,
+            saved: false
+          }));
+          setPosts(mappedPosts);
+        } else {
+          setPosts(INITIAL_POSTS);
+        }
+      } catch (err) {
+        console.error('Error fetching posts:', err);
+        setPosts(INITIAL_POSTS);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchPosts();
+  }, []);
+
+  const toggleLike = async (id: string | number) => {
+    // Only local for now, but in a real app we'd update DB
     setPosts(posts.map(post => {
       if (post.id === id) {
         return {
@@ -81,8 +131,31 @@ export function Comunidad() {
     }));
   };
 
-  const handleNewPost = (newPost: Post) => {
-    setPosts([newPost, ...posts]);
+  const handleNewPost = async (newPost: Post) => {
+    // Insert into Supabase
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .insert([{
+          user_name: newPost.user,
+          avatar_style: newPost.avatar,
+          tag: newPost.tag,
+          description: newPost.desc,
+          media_url: newPost.img,
+          media_type: newPost.mediaType,
+          likes_count: newPost.likes,
+          comments_count: newPost.comments
+        }]);
+
+      if (error) throw error;
+
+      // Update local state to show the new post immediately
+      setPosts([newPost, ...posts]);
+    } catch (err) {
+      console.error('Error saving post:', err);
+      // Fallback: still show it locally
+      setPosts([newPost, ...posts]);
+    }
   };
 
   return (
@@ -93,6 +166,8 @@ export function Comunidad() {
           onPost={handleNewPost}
         />
       )}
+
+      {/* ... (rest of the UI remains the same) ... */}
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
         <div>
@@ -155,7 +230,17 @@ export function Comunidad() {
 
         {/* Feed */}
         <div className="flex-1 space-y-6">
-          {posts.map((post) => (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <Loader2 className="w-10 h-10 text-[#246b38] animate-spin" />
+              <p className="text-gray-500 font-medium animate-pulse">Cargando comunidad...</p>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="text-center py-20 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200">
+              <p className="text-gray-400 font-medium">No hay publicaciones aún. ¡Sé el primero!</p>
+            </div>
+          ) : (
+            posts.map((post) => (
             <div key={post.id} className="bg-white border border-gray-100 rounded-[2rem] p-6 md:p-8 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
@@ -178,8 +263,26 @@ export function Comunidad() {
               <p className="text-gray-700 leading-relaxed mb-6">{post.desc}</p>
 
               {post.img && (
-                <div className="rounded-2xl overflow-hidden mb-6 max-h-[300px]">
-                  <img src={post.img} alt="Post content" className="w-full h-full object-cover" />
+                <div className="rounded-2xl overflow-hidden mb-6 bg-gray-50 flex items-center justify-center aspect-video">
+                  {isIframeable(post.img) ? (
+                    <iframe
+                      src={getEmbedUrl(post.img)}
+                      className="w-full h-full border-none"
+                      allowFullScreen
+                    />
+                  ) : post.mediaType === 'video' ? (
+                    <video 
+                      src={post.img} 
+                      controls 
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <img 
+                      src={post.img} 
+                      alt="Post content" 
+                      className="w-full h-full object-cover" 
+                    />
+                  )}
                 </div>
               )}
 
@@ -206,7 +309,8 @@ export function Comunidad() {
                 </div>
               </div>
             </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>

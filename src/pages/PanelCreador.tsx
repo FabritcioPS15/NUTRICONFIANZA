@@ -1,93 +1,218 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
-  Upload, 
   Video as VideoIcon, 
   FileText, 
-  Clock, 
   ChevronDown,
   FileCheck,
-  Send
+  Send,
+  Loader2,
+  CheckCircle2,
+  Link as LinkIcon,
+  User,
+  Edit2,
+  PlusCircle,
+  XCircle
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { supabase } from '../lib/supabase';
 
 export function PanelCreador() {
+  const [title, setTitle] = useState('');
+  const [authorName, setAuthorName] = useState('');
   const [contentType, setContentType] = useState<'video' | 'flyer'>('video');
+  const [uploadType, setUploadType] = useState<'file' | 'link'>('file');
+  const [linkUrl, setLinkUrl] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Diabetes');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+  const [recentPosts, setRecentPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editId, setEditId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const categories = ['Diabetes', 'Hipertensión', 'Obesidad', 'General'];
 
-  const recentPosts = [
-    {
-      id: 1,
-      title: "Desayunos Saludables",
-      time: "Hace 2 horas",
-      category: "Diabetes",
-      img: "https://images.unsplash.com/photo-1494390248081-4e521a5940db?auto=format&fit=crop&q=80&w=200",
-    },
-    {
-      id: 2,
-      title: "Control de Presión Arterial",
-      time: "Ayer",
-      category: "Hipertensión",
-      img: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=200",
-    },
-    {
-      id: 3,
-      title: "Mitos de la Obesidad",
-      time: "15 Oct 2024",
-      category: "Obesidad",
-      img: "https://images.unsplash.com/photo-1511688858344-185ca3895e63?auto=format&fit=crop&q=80&w=200",
+  useEffect(() => {
+    fetchRecentPosts();
+  }, []);
+
+  const fetchRecentPosts = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('creator_content')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setRecentPosts(data || []);
+    } catch (err) {
+      console.error('Error fetching recent posts:', err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `expert-content/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('Publicaciones')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('Publicaciones')
+        .getPublicUrl(filePath);
+
+      setUploadedUrl(publicUrl);
+    } catch (err) {
+      console.error('Error uploading:', err);
+      alert('Error al subir el archivo');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const startEdit = (post: any) => {
+    setEditId(post.id);
+    setTitle(post.title || '');
+    setAuthorName(post.author_name || '');
+    setContentType(post.content_type || 'video');
+    setSelectedCategory(post.category || 'General');
+    
+    if (post.media_url?.includes('supabase.co')) {
+      setUploadType('file');
+      setUploadedUrl(post.media_url);
+    } else {
+      setUploadType('link');
+      setLinkUrl(post.media_url || '');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditId(null);
+    setTitle('');
+    setAuthorName('');
+    setLinkUrl('');
+    setUploadedUrl(null);
+    setUploadType('file');
+  };
+
+  const handleSubmit = async () => {
+    const finalUrl = uploadType === 'link' ? linkUrl : uploadedUrl;
+
+    if (!title || !authorName || !finalUrl) {
+      alert('Por favor completa todos los campos (título, autor y archivo/link)');
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      
+      const payload = {
+        title,
+        author_name: authorName,
+        category: selectedCategory,
+        content_type: contentType,
+        media_url: finalUrl,
+        thumbnail_url: contentType === 'video' ? 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400' : finalUrl
+      };
+
+      if (editId) {
+        const { error } = await supabase
+          .from('creator_content')
+          .update(payload)
+          .eq('id', editId);
+        if (error) throw error;
+        alert('¡Contenido actualizado con éxito!');
+      } else {
+        const { error } = await supabase
+          .from('creator_content')
+          .insert([payload]);
+        if (error) throw error;
+        alert('¡Contenido publicado con éxito!');
+      }
+
+      cancelEdit();
+      fetchRecentPosts();
+    } catch (err) {
+      console.error('Error saving content:', err);
+      alert('Error al guardar el contenido');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   return (
     <div className="py-12 bg-[#fdfdfd] animate-fade-in-up">
-      <div className="mb-12 flex items-center justify-between gap-4">
+      <div className="mb-12 flex justify-between items-end">
         <div>
-          <span className="text-[#3b8751] font-bold text-xs uppercase tracking-widest bg-[#e0efd5] px-4 py-1.5 rounded-full mb-4 inline-block">
-             Expert: Elena Rodríguez
-          </span>
           <h1 className="text-5xl font-black text-[#1a1a1a] mb-4 tracking-tighter">
-            Panel de Creador
+            {editId ? 'Editando Contenido' : 'Panel de Creador'}
           </h1>
           <p className="text-gray-500 text-lg max-w-2xl leading-relaxed">
-            Comparte tu conocimiento experto con la comunidad. Sube contenido educativo de alta calidad para transformar vidas.
+            {editId ? `Estas modificando: ${title}` : 'Comparte tu conocimiento experto con la comunidad mundial de Nutriconfianza.'}
           </p>
         </div>
-        <div className="hidden md:flex flex-col items-end">
-           <img 
-             src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150" 
-             className="w-16 h-16 rounded-full object-cover border-4 border-white shadow-xl mb-2" 
-             alt="Elena Rodríguez"
-           />
-           <span className="font-bold text-sm text-[#1a1a1a]">Elena Rodríguez</span>
-           <span className="text-[10px] text-gray-400 font-medium">Nutricionista Clínica</span>
-        </div>
+        {editId && (
+          <button 
+            onClick={cancelEdit}
+            className="flex items-center gap-2 bg-rose-50 text-rose-600 px-6 py-3 rounded-2xl font-bold hover:bg-rose-100 transition-colors"
+          >
+            <XCircle className="w-5 h-5" /> Cancelar Edición
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* Main Content Area */}
         <div className="lg:col-span-2 space-y-8">
-          <div className="bg-white border border-gray-100 rounded-[3rem] p-10 shadow-sm">
+          <div className="bg-white border border-gray-100 rounded-[3rem] p-10 shadow-sm relative overflow-hidden">
+            {editId && <div className="absolute top-0 left-0 w-2 h-full bg-[#246b38]" />}
             <h2 className="flex items-center gap-3 text-2xl font-bold mb-10 text-[#1a1a1a]">
               <div className="p-2 bg-[#e0efd5] rounded-xl">
-                 <Upload className="w-6 h-6 text-[#246b38]" />
+                 {editId ? <Edit2 className="w-6 h-6 text-[#246b38]" /> : <PlusCircle className="w-6 h-6 text-[#246b38]" />}
               </div>
-              Nueva Publicación
+              {editId ? 'Modificar Publicación' : 'Nueva Publicación'}
             </h2>
 
             <div className="space-y-8">
-              {/* Title Section */}
-              <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Título del Contenido</label>
-                <input 
-                  type="text" 
-                  placeholder="Ej: Guía Nutricional para la Diabetes Tipo 2"
-                  className="w-full bg-[#f3f4f6]/50 border-none rounded-2xl p-5 text-[#1a1a1a] font-medium placeholder:text-gray-300 focus:ring-2 focus:ring-[#2a5934]/20 transition-all"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Nombre del Autor/Creador</label>
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      value={authorName}
+                      onChange={(e) => setAuthorName(e.target.value)}
+                      placeholder="Ej: Nut. Juan Pérez"
+                      className="w-full bg-[#f3f4f6]/50 border-none rounded-2xl p-5 pl-12 text-[#1a1a1a] font-medium placeholder:text-gray-300 focus:ring-2 focus:ring-[#2a5934]/20 transition-all font-bold"
+                    />
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Título del Contenido</label>
+                  <input 
+                    type="text" 
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Ej: Guía Nutricional 2024"
+                    className="w-full bg-[#f3f4f6]/50 border-none rounded-2xl p-5 text-[#1a1a1a] font-medium placeholder:text-gray-300 focus:ring-2 focus:ring-[#2a5934]/20 transition-all"
+                  />
+                </div>
               </div>
 
-              {/* Row: Category and Type */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Categoría</label>
@@ -136,62 +261,121 @@ export function PanelCreador() {
                 </div>
               </div>
 
-              {/* Upload Dropzone */}
               <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Archivo de Contenido</label>
-                <div className="border-2 border-dashed border-[#e0efd5] rounded-[2.5rem] p-16 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50/50 transition-colors group">
-                   <div className="w-16 h-16 bg-[#e0efd5] rounded-3xl flex items-center justify-center mb-6 text-[#246b38] group-hover:scale-110 transition-transform">
-                      <FileCheck className="w-8 h-8" />
-                   </div>
-                   <h3 className="text-lg font-bold text-[#1a1a1a] mb-2">Arrastra y suelta tu archivo aquí</h3>
-                   <p className="text-sm text-gray-400 mb-8">MP4, PDF o JPG hasta 50MB</p>
-                   <button className="text-[#246b38] text-sm font-bold underline underline-offset-4 decoration-2">
-                     O selecciona desde tu carpeta
-                   </button>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Fuente del Contenido</label>
+                  <div className="flex bg-gray-100 p-1 rounded-xl">
+                    <button 
+                      onClick={() => setUploadType('file')}
+                      className={cn("px-4 py-1.5 rounded-lg text-xs font-bold transition-all", uploadType === 'file' ? "bg-white text-[#246b38] shadow-sm" : "text-gray-400")}
+                    >
+                      Archivo
+                    </button>
+                    <button 
+                      onClick={() => setUploadType('link')}
+                      className={cn("px-4 py-1.5 rounded-lg text-xs font-bold transition-all", uploadType === 'link' ? "bg-white text-[#246b38] shadow-sm" : "text-gray-400")}
+                    >
+                      Link Social
+                    </button>
+                  </div>
                 </div>
+
+                {uploadType === 'file' ? (
+                  <>
+                    <input 
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      accept={contentType === 'video' ? 'video/*' : 'image/*,application/pdf'}
+                    />
+                    <div 
+                      onClick={() => fileInputRef.current?.click()}
+                      className={cn(
+                        "border-2 border-dashed rounded-[2.5rem] p-16 flex flex-col items-center justify-center text-center cursor-pointer transition-colors group",
+                        uploadedUrl ? "border-green-500 bg-green-50/10" : "border-[#e0efd5] hover:bg-gray-50/50"
+                      )}
+                    >
+                       <div className={cn(
+                         "w-16 h-16 rounded-3xl flex items-center justify-center mb-6 transition-transform",
+                         uploadedUrl ? "bg-green-100 text-green-600" : "bg-[#e0efd5] text-[#246b38] group-hover:scale-110"
+                       )}>
+                          {isUploading ? <Loader2 className="w-8 h-8 animate-spin" /> : uploadedUrl ? <CheckCircle2 className="w-8 h-8" /> : <FileCheck className="w-8 h-8" />}
+                       </div>
+                       <h3 className="text-lg font-bold text-[#1a1a1a] mb-2">
+                         {uploadedUrl ? "¡Archivo listo!" : "Selecciona tu archivo"}
+                       </h3>
+                       <p className="text-sm text-gray-400 mb-8 font-medium">MP4, PDF o JPG hasta 50MB</p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="relative">
+                    <input 
+                      type="text"
+                      value={linkUrl}
+                      onChange={(e) => setLinkUrl(e.target.value)}
+                      placeholder="Pega el link de YouTube, TikTok, Twitter o TikTok aquí..."
+                      className="w-full bg-[#f3f4f6] border-2 border-[#e0efd5] rounded-2xl p-8 text-sm focus:ring-2 focus:ring-[#2a5934]/20 transition-all outline-none"
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-[#e0efd5] rounded-xl">
+                      <LinkIcon className="w-5 h-5 text-[#246b38]" />
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Submit Button */}
-              <button className="w-full bg-[#2a5934] hover:bg-[#1a4d2e] text-white py-6 rounded-[2rem] font-bold text-lg flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#2a5934]/20 mt-4">
-                <Send className="w-5 h-5" /> Publicar Contenido
+              <button 
+                onClick={handleSubmit}
+                disabled={isUploading || (uploadType === 'file' ? !uploadedUrl : !linkUrl) || !title || !authorName}
+                className={cn(
+                  "w-full py-6 rounded-[2rem] font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-xl mt-4",
+                  isUploading || (uploadType === 'file' ? !uploadedUrl : !linkUrl) || !title || !authorName
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-[#2a5934] hover:bg-[#1a4d2e] text-white hover:scale-[1.02] active:scale-[0.98] shadow-[#2a5934]/20"
+                )}
+              >
+                {isUploading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Send className="w-5 h-5" />}
+                {editId ? 'Actualizar Contenido' : 'Publicar Contenido'}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-8">
-          <div className="bg-[#f3f4f6]/80 rounded-[3rem] p-8 border border-white">
-            <h3 className="text-xl font-bold mb-8 text-[#1a1a1a]">Mis Publicaciones Recientes</h3>
+          <div className="bg-white rounded-[3rem] p-8 border border-gray-100 shadow-sm">
+            <h3 className="text-xl font-bold mb-8 text-[#1a1a1a]">Publicaciones Recientes</h3>
             <div className="space-y-6">
-              {recentPosts.map(post => (
-                <div key={post.id} className="flex gap-4 items-center group cursor-pointer bg-white p-4 rounded-[2rem] border border-gray-50 hover:shadow-md transition-all">
-                  <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-sm flex-shrink-0">
-                    <img src={post.img} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-sm text-[#1a1a1a] truncate mb-1">{post.title}</h4>
-                    <div className="flex items-center gap-3">
-                       <p className="text-[10px] text-gray-400 flex items-center gap-1">
-                         <Clock className="w-3 h-3" /> {post.time}
-                       </p>
-                       <span className={cn(
-                         "text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest",
-                         post.category === 'Diabetes' ? "bg-green-100 text-green-700" : 
-                         post.category === 'Hipertensión' ? "bg-emerald-100 text-emerald-800" : 
-                         "bg-rose-100 text-rose-700"
-                       )}>
-                         {post.category}
-                       </span>
+              {loading ? (
+                <div className="flex justify-center p-10"><Loader2 className="w-8 h-8 text-gray-300 animate-spin" /></div>
+              ) : recentPosts.length === 0 ? (
+                <p className="text-center text-gray-400 text-sm">No hay publicaciones.</p>
+              ) : (
+                recentPosts.map(post => (
+                  <div 
+                    key={post.id} 
+                    onClick={() => startEdit(post)}
+                    className={cn(
+                      "flex gap-4 items-center group cursor-pointer p-4 rounded-[2rem] border transition-all",
+                      editId === post.id ? "bg-[#e0efd5] border-[#246b38]" : "bg-gray-50 border-transparent hover:border-[#e0efd5]"
+                    )}
+                  >
+                    <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-sm flex-shrink-0 bg-white flex items-center justify-center">
+                      {post.content_type === 'video' ? <VideoIcon className="w-5 h-5 text-[#246b38]" /> : <FileText className="w-5 h-5 text-[#246b38]" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-sm text-[#1a1a1a] truncate mb-0.5">{post.title}</h4>
+                      <p className="text-[10px] text-gray-500 font-bold mb-1">Por: {post.author_name}</p>
+                      <div className="flex items-center gap-3">
+                         <span className="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest bg-white/50 text-gray-600">
+                           {post.category}
+                         </span>
+                         <Edit2 className="w-3 h-3 text-gray-300 group-hover:text-[#246b38] ml-auto transition-colors" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
-
-            <button className="w-full mt-8 py-5 border-2 border-gray-200 rounded-[2rem] text-sm font-bold text-gray-500 hover:bg-white hover:border-[#246b38] hover:text-[#246b38] transition-all">
-              Ver historial completo
-            </button>
           </div>
         </div>
       </div>
