@@ -116,38 +116,8 @@ export const authService = {
   },
 
   onAuthStateChange(callback: (user: User | null) => void) {
-    return supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!session?.user) {
-        callback(null);
-        return;
-      }
-
-      // Fetch user profile from profiles table to get the role
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-
-      if (profileError) {
-        console.error('Error fetching profile:', profileError);
-        callback(session.user as User);
-        return;
-      }
-
-      // Merge auth user with profile data
-      const mergedUser: User = {
-        id: session.user.id,
-        email: session.user.email || profile.email || '',
-        role: profile.role || 'user',
-        full_name: profile.full_name || session.user.user_metadata?.full_name,
-        created_at: profile.created_at || session.user.created_at || '',
-        updated_at: profile.updated_at || new Date().toISOString(),
-        avatar_url: profile.avatar_url,
-        accessibility: profile.accessibility,
-      };
-
-      callback(mergedUser);
+    return supabase.auth.onAuthStateChange((_event, session) => {
+      callback(session?.user as User || null);
     });
   },
 
