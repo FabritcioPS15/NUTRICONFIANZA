@@ -2,7 +2,10 @@ import { Download, Bookmark, Eye, Loader2, X, ChevronDown, ArrowUp } from 'lucid
 import { cn } from '../lib/utils';
 import { useState, useEffect } from 'react';
 import { Flyer } from '../types';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase/client';
+import { useAuth } from '../hooks/useAuth';
+import { useFavorites } from '../hooks/useFavorites';
+import { useWatched } from '../hooks/useWatched';
 
 const INITIAL_FLYERS: Flyer[] = [
   {
@@ -17,6 +20,9 @@ const INITIAL_FLYERS: Flyer[] = [
 ];
 
 export function Flyers() {
+  const { user } = useAuth();
+  const { favorites, addFavorite, removeFavorite } = useFavorites(user?.id || null);
+  const { markAsWatched } = useWatched(user?.id || null);
   const filters = ['Todos los Temas', 'Diabetes', 'Hipertensión', 'Obesidad', 'General'];
   const [selectedFilter, setSelectedFilter] = useState('Todos los Temas');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -24,10 +30,6 @@ export function Flyers() {
   const [loading, setLoading] = useState(true);
   const [viewingFlyer, setViewingFlyer] = useState<Flyer | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [savedIds, setSavedIds] = useState<string[]>(() => {
-    const saved = localStorage.getItem('nutriconfianza_saved_flyers');
-    return saved ? JSON.parse(saved) : [];
-  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,10 +42,6 @@ export function Flyers() {
   useEffect(() => {
     fetchFlyers();
   }, [selectedFilter]);
-
-  useEffect(() => {
-    localStorage.setItem('nutriconfianza_saved_flyers', JSON.stringify(savedIds));
-  }, [savedIds]);
 
   const fetchFlyers = async () => {
     try {
@@ -85,9 +83,24 @@ export function Flyers() {
     }
   };
 
-  const toggleSave = (id: string) => {
-    setSavedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  const toggleSave = async (id: string) => {
+    const isFav = favorites.some(f => f.content_id === id);
+    if (isFav) {
+      await removeFavorite(id);
+    } else {
+      await addFavorite(id, 'flyer');
+    }
   };
+
+  const isFavorite = (id: string) => {
+    return favorites.some(f => f.content_id === id);
+  };
+
+  useEffect(() => {
+    if (viewingFlyer && user?.id) {
+      markAsWatched(String(viewingFlyer.id), 'flyer');
+    }
+  }, [viewingFlyer, user?.id, markAsWatched]);
 
   return (
     <div className="py-8 animate-fade-in-up">
@@ -200,14 +213,14 @@ export function Flyers() {
                          <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                            <Eye className="w-8 h-8 text-white" />
                          </div>
-                         <button 
+                         <button
                            onClick={(e) => { e.stopPropagation(); toggleSave(String(flyer.id)); }}
                            className={cn(
-                             "absolute top-5 right-5 w-12 h-12 rounded-2xl flex items-center justify-center backdrop-blur-md transition-all shadow-lg", 
-                             savedIds.includes(String(flyer.id)) ? "bg-[#246b38] text-white" : "bg-white/80 text-gray-600 hover:bg-white"
+                             "absolute top-5 right-5 w-12 h-12 rounded-2xl flex items-center justify-center backdrop-blur-md transition-all shadow-lg",
+                             isFavorite(String(flyer.id)) ? "bg-[#246b38] text-white" : "bg-white/80 text-gray-600 hover:bg-white"
                            )}
                          >
-                            <Bookmark className={cn("w-5 h-5", savedIds.includes(String(flyer.id)) ? "fill-current" : "")} />
+                            <Bookmark className={cn("w-5 h-5", isFavorite(String(flyer.id)) ? "fill-current" : "")} />
                          </button>
                       </div>
                       <div className="p-6 md:p-8 flex flex-col flex-1">
@@ -279,16 +292,16 @@ export function Flyers() {
                     <button className="flex-1 bg-white text-[#1a1a1a] px-8 py-5 rounded-[2rem] font-bold text-sm flex items-center justify-center gap-3 hover:scale-[1.02] shadow-xl transition-all">
                       <Download className="w-5 h-5" /> Descargar PDF
                     </button>
-                    <button 
+                    <button
                       onClick={() => toggleSave(String(viewingFlyer.id))}
                       className={cn(
-                        "p-5 rounded-[2rem] font-bold text-sm flex items-center transition-all border", 
-                        savedIds.includes(String(viewingFlyer.id)) 
-                          ? "bg-[#246b38] border-transparent text-white" 
+                        "p-5 rounded-[2rem] font-bold text-sm flex items-center transition-all border",
+                        isFavorite(String(viewingFlyer.id))
+                          ? "bg-[#246b38] border-transparent text-white"
                           : "bg-white/5 border-white/10 text-white hover:bg-white/10"
                       )}
                     >
-                      <Bookmark className={cn("w-6 h-6", savedIds.includes(String(viewingFlyer.id)) ? "fill-current" : "")} />
+                      <Bookmark className={cn("w-6 h-6", isFavorite(String(viewingFlyer.id)) ? "fill-current" : "")} />
                     </button>
                   </div>
                </div>

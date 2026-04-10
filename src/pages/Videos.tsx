@@ -2,7 +2,10 @@ import { Play, Loader2, X, Bookmark, ChevronDown } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useState, useEffect } from 'react';
 import { Video } from '../types';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase/client';
+import { useAuth } from '../hooks/useAuth';
+import { useFavorites } from '../hooks/useFavorites';
+import { useWatched } from '../hooks/useWatched';
 
 const INITIAL_VIDEOS: Video[] = [
   {
@@ -17,24 +20,25 @@ const INITIAL_VIDEOS: Video[] = [
 ];
 
 export function Videos() {
+  const { user } = useAuth();
+  const { favorites, addFavorite, removeFavorite } = useFavorites(user?.id || null);
+  const { markAsWatched } = useWatched(user?.id || null);
   const categories = ['Todos', 'Diabetes', 'Hipertensión', 'Obesidad', 'General'];
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [videosList, setVideosList] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [playingVideo, setPlayingVideo] = useState<Video | null>(null);
-  const [savedIds, setSavedIds] = useState<string[]>(() => {
-    const saved = localStorage.getItem('nutriconfianza_saved_videos');
-    return saved ? JSON.parse(saved) : [];
-  });
 
   useEffect(() => {
     fetchVideos();
   }, [selectedCategory]);
 
   useEffect(() => {
-    localStorage.setItem('nutriconfianza_saved_videos', JSON.stringify(savedIds));
-  }, [savedIds]);
+    if (playingVideo && user?.id) {
+      markAsWatched(String(playingVideo.id), 'video');
+    }
+  }, [playingVideo, user?.id, markAsWatched]);
 
   const fetchVideos = async () => {
     try {
@@ -76,8 +80,17 @@ export function Videos() {
     }
   };
 
-  const toggleSave = (id: string) => {
-    setSavedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  const toggleSave = async (id: string) => {
+    const isFav = favorites.some(f => f.content_id === id);
+    if (isFav) {
+      await removeFavorite(id);
+    } else {
+      await addFavorite(id, 'video');
+    }
+  };
+
+  const isFavorite = (id: string) => {
+    return favorites.some(f => f.content_id === id);
   };
 
   const getEmbedUrl = (url: string) => {
@@ -228,14 +241,14 @@ export function Videos() {
                         <p className="text-gray-500 text-sm font-medium">{video.desc}</p>
                       </div>
                       <div className="flex gap-2">
-                         <button 
+                         <button
                            onClick={() => toggleSave(String(video.id))}
                            className={cn(
                              "p-4 rounded-2xl transition-all shadow-sm",
-                             savedIds.includes(String(video.id)) ? "bg-[#246b38] text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                             isFavorite(String(video.id)) ? "bg-[#246b38] text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                            )}
                          >
-                           <Bookmark className={cn("w-5 h-5", savedIds.includes(String(video.id)) ? "fill-current" : "")} />
+                           <Bookmark className={cn("w-5 h-5", isFavorite(String(video.id)) ? "fill-current" : "")} />
                          </button>
                       </div>
                     </div>

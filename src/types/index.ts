@@ -1,3 +1,4 @@
+// Content types
 export interface Post {
   id: string | number;
   user: string;
@@ -34,3 +35,8 @@ export interface Flyer {
   featured?: boolean;
   saved: boolean;
 }
+
+// Re-export domain-specific types
+export * from './auth';
+export * from './user';
+export * from './plans';

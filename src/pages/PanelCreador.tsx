@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Video as VideoIcon, 
   FileText, 
@@ -17,9 +18,10 @@ import {
   LogOut
 } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase/client';
 
 export function PanelCreador() {
+  const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [authorName, setAuthorName] = useState('');
   const [contentType, setContentType] = useState<'video' | 'flyer'>('video');
@@ -75,6 +77,7 @@ export function PanelCreador() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    navigate('/');
   };
 
   const fetchRecentPosts = async () => {

@@ -1,12 +1,17 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Heart, User, ShieldPlus, Menu, X, ArrowRight } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { User, ShieldPlus, Menu, X, ArrowRight } from 'lucide-react';
+import { cn } from '../../lib/utils';
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 
 export function Navbar() {
   const location = useLocation();
+  const { user } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const isSuperAdmin = user?.role === 'super_admin';
+  const canAccessCreator = user?.role === 'premium' || user?.role === 'admin' || user?.role === 'super_admin';
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -24,8 +29,8 @@ export function Navbar() {
     { name: 'Videos', path: '/videos' },
     { name: 'Flyers', path: '/flyers' },
     { name: 'Comunidad', path: '/comunidad' },
-    { name: 'Panel Creador', path: '/creador' },
-    { name: 'Guardados', path: '/guardados' },
+    ...(canAccessCreator ? [{ name: 'Panel Creador', path: '/creador' }] : []),
+    ...(isSuperAdmin ? [{ name: 'Admin', path: '/admin' }] : []),
   ];
 
   return (
@@ -38,10 +43,10 @@ export function Navbar() {
       )}>
         {/* Brand */}
         <Link to="/" className="flex items-center gap-2 group relative z-[110]">
-          <div className="w-10 h-10 bg-[#246b38] rounded-xl flex items-center justify-center shadow-lg shadow-[#246b38]/20 group-hover:rotate-12 transition-transform">
-             <ShieldPlus className="w-6 h-6 text-white" />
+          <div className="w-9 h-9 md:w-10 md:h-10 bg-[#246b38] rounded-xl flex items-center justify-center shadow-lg shadow-[#246b38]/20 group-hover:rotate-12 transition-transform">
+             <ShieldPlus className="w-5 h-5 md:w-6 md:h-6 text-white" />
           </div>
-          <span className="text-xl font-black text-[#1a1a1a] tracking-tighter">
+          <span className="text-lg md:text-xl font-black text-[#1a1a1a] tracking-tighter">
             NUTRI<span className="text-[#246b38]">CONFIANZA</span>
           </span>
         </Link>
@@ -70,19 +75,9 @@ export function Navbar() {
         {/* Action Icons */}
         <div className="flex items-center gap-2 md:gap-3 relative z-[110]">
           <Link 
-            to="/guardados" 
-            className={cn(
-              "p-3 rounded-2xl transition-all relative group",
-              location.pathname === '/guardados' ? "bg-rose-50 text-rose-500" : "bg-gray-100/50 text-gray-400 hover:bg-rose-50 hover:text-rose-500"
-            )}
-          >
-            <Heart className={cn("w-5 h-5", location.pathname === '/guardados' ? "fill-current" : "group-hover:fill-current")} />
-          </Link>
-          
-          <Link 
             to="/perfil" 
             className={cn(
-              "p-3 rounded-2xl transition-all group hidden md:flex",
+              "p-3 rounded-2xl transition-all group",
               location.pathname === '/perfil' ? "bg-[#e0efd5] text-[#246b38]" : "bg-gray-100/50 text-gray-400 hover:bg-[#e0efd5] hover:text-[#246b38]"
             )}
           >
@@ -147,6 +142,52 @@ export function Navbar() {
                  </Link>
                );
              })}
+             
+             {/* Auth Links */}
+             {!user ? (
+               <>
+                 <Link
+                  to="/login"
+                  style={{ transitionDelay: `${links.length * 50}ms` }}
+                  className={cn(
+                    "flex items-center justify-between p-6 rounded-[2rem] text-xl font-black transition-all border-4",
+                    location.pathname === '/login'
+                      ? "bg-[#246b38] text-white border-[#246b38] shadow-2xl shadow-[#246b38]/30 scale-105" 
+                      : "text-gray-400 border-transparent hover:text-[#246b38] hover:border-[#246b38]/10"
+                  )}
+                 >
+                   Iniciar Sesión
+                   <ArrowRight className={cn("w-6 h-6 transition-transform", location.pathname === '/login' ? "translate-x-0" : "-translate-x-4 opacity-0")} />
+                 </Link>
+                 <Link
+                  to="/registro"
+                  style={{ transitionDelay: `${(links.length + 1) * 50}ms` }}
+                  className={cn(
+                    "flex items-center justify-between p-6 rounded-[2rem] text-xl font-black transition-all border-4",
+                    location.pathname === '/registro'
+                      ? "bg-[#246b38] text-white border-[#246b38] shadow-2xl shadow-[#246b38]/30 scale-105" 
+                      : "text-gray-400 border-transparent hover:text-[#246b38] hover:border-[#246b38]/10"
+                  )}
+                 >
+                   Registrarse
+                   <ArrowRight className={cn("w-6 h-6 transition-transform", location.pathname === '/registro' ? "translate-x-0" : "-translate-x-4 opacity-0")} />
+                 </Link>
+               </>
+             ) : (
+               <Link
+                to="/perfil"
+                style={{ transitionDelay: `${links.length * 50}ms` }}
+                className={cn(
+                  "flex items-center justify-between p-6 rounded-[2rem] text-xl font-black transition-all border-4",
+                  location.pathname === '/perfil'
+                    ? "bg-[#246b38] text-white border-[#246b38] shadow-2xl shadow-[#246b38]/30 scale-105" 
+                    : "text-gray-400 border-transparent hover:text-[#246b38] hover:border-[#246b38]/10"
+                )}
+               >
+                 Mi Perfil
+                 <ArrowRight className={cn("w-6 h-6 transition-transform", location.pathname === '/perfil' ? "translate-x-0" : "-translate-x-4 opacity-0")} />
+               </Link>
+             )}
            </div>
            
            <div className="absolute bottom-12 text-center w-full">

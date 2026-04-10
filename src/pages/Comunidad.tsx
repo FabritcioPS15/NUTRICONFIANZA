@@ -1,9 +1,11 @@
-import { Plus, Heart, MessageSquare, Share2, MoreHorizontal, Dumbbell, Apple, Activity, Users, Bookmark, Loader2 } from 'lucide-react';
+import { Plus, Heart, MessageSquare, Share2, MoreHorizontal, Dumbbell, Apple, Activity, Users, Bookmark, Loader2, LogIn, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { cn } from '../lib/utils';
-import { Editor } from '../components/Editor';
+import { Editor } from '../components/ui/Editor';
 import { Post } from '../types';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase/client';
+import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 
 const INITIAL_POSTS = [
@@ -58,22 +60,12 @@ const isIframeable = (url: string) => {
 };
 
 export function Comunidad() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-    
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-    
-    return () => subscription.unsubscribe();
-  }, []);
+  const isSuperAdmin = user?.role === 'super_admin';
 
   // Fetch posts from Supabase on mount
   useEffect(() => {
@@ -88,6 +80,24 @@ export function Comunidad() {
         if (error) throw error;
 
         if (data && data.length > 0) {
+          // Fetch user's likes and saved posts
+          let userLikedPostIds: string[] = [];
+          let userSavedPostIds: string[] = [];
+
+          if (user?.id) {
+            const [likesData, savedData] = await Promise.all([
+              supabase.from('post_likes').select('post_id').eq('user_id', user.id),
+              supabase.from('saved_posts').select('post_id').eq('user_id', user.id)
+            ]);
+
+            if (likesData.data) {
+              userLikedPostIds = likesData.data.map(l => l.post_id);
+            }
+            if (savedData.data) {
+              userSavedPostIds = savedData.data.map(s => s.post_id);
+            }
+          }
+
           // Map DB fields to our Post interface
           const mappedPosts: Post[] = data.map(p => ({
             id: p.id,
@@ -100,8 +110,8 @@ export function Comunidad() {
             mediaType: p.media_type as 'image' | 'video',
             likes: p.likes_count || 0,
             comments: p.comments_count || 0,
-            liked: false,
-            saved: false
+            liked: userLikedPostIds.includes(p.id),
+            saved: userSavedPostIds.includes(p.id)
           }));
           setPosts(mappedPosts);
         } else {
@@ -116,40 +126,100 @@ export function Comunidad() {
     }
 
     fetchPosts();
-  }, []);
+  }, [user?.id]);
 
   const toggleLike = async (id: string | number) => {
-    // Only local for now, but in a real app we'd update DB
-    setPosts(posts.map(post => {
-      if (post.id === id) {
-        return {
-          ...post,
-          liked: !post.liked,
-          likes: post.liked ? post.likes - 1 : post.likes + 1
-        };
+    if (!user?.id) return;
+
+    const post = posts.find(p => p.id === id);
+    if (!post) return;
+
+    try {
+      if (post.liked) {
+        // Remove like from DB
+        await supabase
+          .from('post_likes')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('post_id', id);
+
+        // Decrement likes count in posts table
+        await supabase
+          .from('posts')
+          .update({ likes_count: Math.max(0, post.likes - 1) })
+          .eq('id', id);
+      } else {
+        // Add like to DB
+        await supabase
+          .from('post_likes')
+          .insert([{ user_id: user.id, post_id: id }]);
+
+        // Increment likes count in posts table
+        await supabase
+          .from('posts')
+          .update({ likes_count: post.likes + 1 })
+          .eq('id', id);
       }
-      return post;
-    }));
+
+      // Update local state
+      setPosts(posts.map(p => {
+        if (p.id === id) {
+          return {
+            ...p,
+            liked: !p.liked,
+            likes: p.liked ? p.likes - 1 : p.likes + 1
+          };
+        }
+        return p;
+      }));
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    }
   };
 
-  const toggleSave = (id: string | number) => {
-    setPosts(posts.map(post => {
-      if (post.id === id) {
-        return {
-          ...post,
-          saved: !post.saved
-        };
+  const toggleSave = async (id: string | number) => {
+    if (!user?.id) return;
+
+    const post = posts.find(p => p.id === id);
+    if (!post) return;
+
+    try {
+      if (post.saved) {
+        // Remove saved post from DB
+        await supabase
+          .from('saved_posts')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('post_id', id);
+      } else {
+        // Add saved post to DB
+        await supabase
+          .from('saved_posts')
+          .insert([{ user_id: user.id, post_id: id }]);
       }
-      return post;
-    }));
+
+      // Update local state
+      setPosts(posts.map(p => {
+        if (p.id === id) {
+          return {
+            ...p,
+            saved: !p.saved
+          };
+        }
+        return p;
+      }));
+    } catch (error) {
+      console.error('Error toggling save:', error);
+    }
   };
 
   const handleNewPost = async (newPost: Post) => {
     // Insert into Supabase
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('posts')
         .insert([{
+          user_id: user?.id,
           user_name: newPost.user,
           avatar_style: newPost.avatar,
           tag: newPost.tag,
@@ -158,16 +228,54 @@ export function Comunidad() {
           media_type: newPost.mediaType,
           likes_count: newPost.likes,
           comments_count: newPost.comments
-        }]);
+        }])
+        .select()
+        .single();
 
       if (error) throw error;
 
-      // Update local state to show the new post immediately
-      setPosts([newPost, ...posts]);
+      // Update local state with the post from DB (includes the generated ID)
+      if (data) {
+        const mappedPost: Post = {
+          id: data.id,
+          user: data.user_name || "Usuario Invitado",
+          time: new Date(data.created_at).toLocaleString(),
+          tag: data.tag || "General",
+          avatar: data.avatar_style || "bg-gray-200",
+          desc: data.description || "",
+          img: data.media_url,
+          mediaType: data.media_type as 'image' | 'video',
+          likes: data.likes_count || 0,
+          comments: data.comments_count || 0,
+          liked: false,
+          saved: false
+        };
+        setPosts([mappedPost, ...posts]);
+      }
     } catch (err) {
       console.error('Error saving post:', err);
+      console.error('Error details:', JSON.stringify(err, null, 2));
       // Fallback: still show it locally
       setPosts([newPost, ...posts]);
+    }
+  };
+
+  const handleDeletePost = async (postId: string | number) => {
+    if (!isSuperAdmin) return;
+    
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', postId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setPosts(posts.filter(post => post.id !== postId));
+    } catch (err) {
+      console.error('Error deleting post:', err);
+      alert('Error al eliminar la publicación');
     }
   };
 
@@ -191,18 +299,21 @@ export function Comunidad() {
             Un lugar para compartir experiencias, aprender juntos y construir<br className="hidden md:block" /> hábitos saludables con el apoyo de la comunidad.
           </p>
         </div>
-        <button
-          onClick={() => {
-            if (!user) {
-              alert('Debes iniciar sesión para publicar en la comunidad.');
-              return;
-            }
-            setIsEditorOpen(true);
-          }}
-          className="w-full md:w-auto bg-[#246b38] hover:bg-[#1a4d2e] text-white px-8 py-5 rounded-[2rem] font-bold flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#246b38]/20"
-        >
-          <Plus className="w-6 h-6" /> Nueva publicación
-        </button>
+        {user ? (
+          <button
+            onClick={() => setIsEditorOpen(true)}
+            className="w-full md:w-auto bg-[#246b38] hover:bg-[#1a4d2e] text-white px-8 py-5 rounded-[2rem] font-bold flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#246b38]/20"
+          >
+            <Plus className="w-6 h-6" /> Nueva publicación
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate('/login')}
+            className="w-full md:w-auto bg-[#e0efd5] hover:bg-[#cce3d1] text-[#246b38] px-8 py-5 rounded-[2rem] font-bold flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#246b38]/20"
+          >
+            <LogIn className="w-6 h-6" /> Inicia sesión para publicar
+          </button>
+        )}
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
@@ -276,7 +387,18 @@ export function Comunidad() {
                     </p>
                   </div>
                 </div>
-                <button className="text-gray-400 hover:text-gray-600"><MoreHorizontal className="w-5 h-5" /></button>
+                <div className="flex items-center gap-2">
+                  {isSuperAdmin && (
+                    <button
+                      onClick={() => handleDeletePost(post.id)}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                      title="Eliminar publicación"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button className="text-gray-400 hover:text-gray-600"><MoreHorizontal className="w-5 h-5" /></button>
+                </div>
               </div>
 
               <p className="text-gray-700 leading-relaxed mb-6">{post.desc}</p>
