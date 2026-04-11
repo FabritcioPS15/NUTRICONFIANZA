@@ -47,7 +47,6 @@ export function useCommunityStats(userId: string | null) {
           postsSaved: savedPosts?.length || 0
         });
       } catch (error) {
-        console.error('Error fetching community stats:', error);
       } finally {
         setLoading(false);
       }

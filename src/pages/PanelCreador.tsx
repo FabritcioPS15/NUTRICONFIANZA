@@ -93,7 +93,6 @@ export function PanelCreador() {
       if (error) throw error;
       setRecentPosts(data || []);
     } catch (err) {
-      console.error('Error fetching recent posts:', err);
     } finally {
       setLoading(false);
     }
@@ -121,7 +120,6 @@ export function PanelCreador() {
 
       setUploadedUrl(publicUrl);
     } catch (err: any) {
-      console.error('Error uploading:', err);
       alert(`Error al subir (${err.message || 'Error de conexión'}). Asegúrate de tener el Bucket "Publicaciones" creado en Supabase con políticas públicas de inserción.`);
     } finally {
       setIsUploading(false);
@@ -129,18 +127,10 @@ export function PanelCreador() {
   };
 
   const startEdit = (post: any) => {
-    console.log('Click en post:', post);
-    console.log('Content type:', post.content_type);
-    console.log('ID:', post.id);
-    
     if (post.content_type === 'video') {
-      console.log('Navegando a editar video:', `/edit-video/${post.id}`);
       navigate(`/edit-video/${post.id}`);
     } else if (post.content_type === 'flyer') {
-      console.log('Navegando a editar flyer:', `/edit-flyer/${post.id}`);
       navigate(`/edit-flyer/${post.id}`);
-    } else {
-      console.log('Tipo de contenido no reconocido:', post.content_type);
     }
   };
 
@@ -163,7 +153,6 @@ export function PanelCreador() {
       fetchRecentPosts();
       alert('Contenido eliminado correctamente');
     } catch (err) {
-      console.error('Error al eliminar:', err);
       alert('Error al eliminar el contenido');
     }
   };
@@ -215,7 +204,6 @@ export function PanelCreador() {
       cancelEdit();
       fetchRecentPosts();
     } catch (err) {
-      console.error('Error saving content:', err);
       alert('Error al guardar el contenido');
     } finally {
       setIsUploading(false);
@@ -504,7 +492,6 @@ export function PanelCreador() {
                   <div 
                     key={post.id} 
                     onClick={(e) => {
-                      console.log('CLICK EN DIV - post:', post);
                       e.preventDefault();
                       e.stopPropagation();
                       startEdit(post);

@@ -78,8 +78,6 @@ export function Flyers() {
         setFlyersList(INITIAL_FLYERS.filter(f => selectedFilter === 'Todos los Temas' || f.tag?.includes(selectedFilter.toUpperCase())));
       }
     } catch (err) {
-      console.error('Error fetching flyers:', err);
-      setFlyersList(INITIAL_FLYERS);
     } finally {
       setLoading(false);
     }

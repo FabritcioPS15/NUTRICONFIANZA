@@ -32,7 +32,6 @@ export function ViewFlyer() {
       if (error) throw error;
       setFlyer(data);
     } catch (err) {
-      console.error('Error fetching flyer:', err);
     } finally {
       setLoading(false);
     }

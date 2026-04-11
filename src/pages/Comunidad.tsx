@@ -118,8 +118,6 @@ export function Comunidad() {
           setPosts(INITIAL_POSTS);
         }
       } catch (err) {
-        console.error('Error fetching posts:', err);
-        setPosts(INITIAL_POSTS);
       } finally {
         setLoading(false);
       }
@@ -173,7 +171,7 @@ export function Comunidad() {
         return p;
       }));
     } catch (error) {
-      console.error('Error toggling like:', error);
+      alert('Error al dar like');
     }
   };
 
@@ -209,7 +207,7 @@ export function Comunidad() {
         return p;
       }));
     } catch (error) {
-      console.error('Error toggling save:', error);
+      alert('Error al guardar');
     }
   };
 
@@ -253,10 +251,7 @@ export function Comunidad() {
         setPosts([mappedPost, ...posts]);
       }
     } catch (err) {
-      console.error('Error saving post:', err);
-      console.error('Error details:', JSON.stringify(err, null, 2));
-      // Fallback: still show it locally
-      setPosts([newPost, ...posts]);
+      alert('Error al publicar');
     }
   };
 
@@ -273,8 +268,7 @@ export function Comunidad() {
 
       // Remove from local state
       setPosts(posts.filter(post => post.id !== postId));
-    } catch (err) {
-      console.error('Error deleting post:', err);
+    } catch (error) {
       alert('Error al eliminar la publicación');
     }
   };

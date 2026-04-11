@@ -32,7 +32,6 @@ export function ViewVideo() {
       if (error) throw error;
       setVideo(data);
     } catch (err) {
-      console.error('Error fetching video:', err);
     } finally {
       setLoading(false);
     }

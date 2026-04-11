@@ -50,7 +50,7 @@ export function Perfil() {
           })
           .eq('id', user.id);
       } catch (error) {
-        console.error('Error saving accessibility settings:', error);
+        alert('Error al guardar configuración');
       }
     };
 

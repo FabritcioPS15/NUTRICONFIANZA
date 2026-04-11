@@ -47,9 +47,8 @@ export function Editor({ onClose, onPost }: EditorProps) {
       setUploadedUrl(publicUrl);
       setFileType(file.type.startsWith('video/') ? 'video' : 'image');
 
-    } catch (error: any) {
-      console.error('Error uploading file:', error);
-      alert(`Error al subir el archivo (${error.message}). Revisa si el Bucket "Publicaciones" existe y es público.`);
+    } catch (error) {
+      alert('Error al subir el archivo');
     } finally {
       setIsUploading(false);
     }

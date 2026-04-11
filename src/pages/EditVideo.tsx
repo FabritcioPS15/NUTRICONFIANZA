@@ -46,7 +46,6 @@ export function EditVideo() {
       setThumbnailUrl(data.thumbnail_url || '');
       setUploadType(data.media_url?.includes('supabase.co') ? 'file' : 'link');
     } catch (err) {
-      console.error('Error fetching video:', err);
     } finally {
       setLoading(false);
     }
@@ -74,7 +73,6 @@ export function EditVideo() {
 
       setMediaUrl(data.publicUrl);
     } catch (err) {
-      console.error('Error uploading:', err);
       alert('Error al subir el archivo');
     }
   };
@@ -100,14 +98,11 @@ export function EditVideo() {
 
       setThumbnailUrl(data.publicUrl);
     } catch (err) {
-      console.error('Error uploading thumbnail:', err);
       alert('Error al subir el thumbnail');
     }
   };
 
   const handleSave = async () => {
-    console.log('Guardando video:', { id, title, authorName, category, mediaUrl });
-    
     if (!title || !authorName || !mediaUrl) {
       alert('Por favor completa todos los campos');
       return;
@@ -123,12 +118,7 @@ export function EditVideo() {
         .eq('id', id)
         .single();
 
-      console.log('Registro existente:', existingRecord);
-      console.log('media_url actual:', existingRecord?.media_url);
-      console.log('media_url nuevo:', mediaUrl);
-
       if (fetchError) {
-        console.error('Error al buscar registro:', fetchError);
         throw fetchError;
       }
 
@@ -138,16 +128,6 @@ export function EditVideo() {
       }
 
       // Ahora actualizar usando la función RPC
-      console.log('Intentando actualizar usando RPC...');
-      console.log('Valores enviados a RPC:', {
-        p_id: id,
-        p_title: title,
-        p_author_name: authorName,
-        p_category: category,
-        p_media_url: mediaUrl,
-        p_thumbnail_url: thumbnailUrl,
-      });
-      
       const { error: rpcError, data: updatedRecord } = await supabase.rpc('update_creator_content', {
         p_id: id,
         p_title: title,
@@ -157,37 +137,17 @@ export function EditVideo() {
         p_thumbnail_url: thumbnailUrl,
       });
 
-      console.log('Resultado del RPC:', { rpcError, updatedRecord });
-      console.log('Valores actualizados en el registro retornado:', {
-        title: updatedRecord?.title,
-        author_name: updatedRecord?.author_name,
-        category: updatedRecord?.category,
-        media_url: updatedRecord?.media_url,
-      });
-
       if (rpcError) {
-        console.error('Error al actualizar con RPC:', rpcError);
         throw rpcError;
       }
 
-      console.log('Registro actualizado:', updatedRecord);
-      console.log('media_url actualizado:', updatedRecord?.media_url);
-      console.log('media_url esperado:', mediaUrl);
-
       if (updatedRecord?.media_url === mediaUrl) {
-        console.log('Guardado exitoso');
         alert('Cambios guardados correctamente');
         navigate('/creador');
       } else {
-        console.warn('El media_url no se actualizó');
-        console.warn('Diferencia:', {
-          actual: updatedRecord?.media_url,
-          esperado: mediaUrl
-        });
         alert('El link no se guardó correctamente. Por favor intenta de nuevo.');
       }
     } catch (err) {
-      console.error('Error saving:', err);
       alert(`Error al guardar los cambios: ${err instanceof Error ? err.message : 'Error desconocido'}`);
     } finally {
       setSaving(false);

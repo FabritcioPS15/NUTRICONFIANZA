@@ -85,9 +85,7 @@ export function Login() {
                 <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-[#246b38] transition-colors" />
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    console.log('Click en ojito, showPassword:', showPassword);
+                  onClick={() => {
                     setShowPassword(!showPassword);
                   }}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#246b38] transition-colors"

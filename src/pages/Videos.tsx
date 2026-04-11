@@ -80,8 +80,6 @@ export function Videos() {
         setVideosList(INITIAL_VIDEOS.filter(v => selectedCategory === 'Todos' || v.category === selectedCategory));
       }
     } catch (err) {
-      console.error('Error fetching videos:', err);
-      setVideosList(INITIAL_VIDEOS);
     } finally {
       setLoading(false);
     }

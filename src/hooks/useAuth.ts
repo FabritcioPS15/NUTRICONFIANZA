@@ -12,7 +12,6 @@ export function useAuth() {
   const [profileLoaded, setProfileLoaded] = useState(false);
 
   const loadUserProfile = async (authUser: User | null) => {
-    console.log('loadUserProfile called with:', authUser?.email, authUser?.role);
     if (!authUser) {
       setProfileLoaded(true);
       return authUser;
@@ -25,10 +24,8 @@ export function useAuth() {
         .eq('id', authUser.id)
         .single();
 
-      console.log('Profile query result:', { profile, error: profileError });
 
       if (profileError) {
-        console.error('Error fetching profile:', profileError);
         return authUser;
       }
 
@@ -44,11 +41,9 @@ export function useAuth() {
         accessibility: profile.accessibility,
       } as User;
 
-      console.log('Loaded user profile:', { email: mergedUser.email, role: mergedUser.role, profileRole: profile.role, profile });
       setProfileLoaded(true);
       return mergedUser;
     } catch (error) {
-      console.error('Error loading user profile:', error);
       setProfileLoaded(true);
       return authUser;
     }

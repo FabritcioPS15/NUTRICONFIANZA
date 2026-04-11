@@ -34,7 +34,6 @@ export const authService = {
           });
 
         if (profileError) {
-          console.error('Error creating profile:', profileError);
         }
       }
 
@@ -92,7 +91,6 @@ export const authService = {
         .single();
 
       if (profileError) {
-        console.error('Error fetching profile:', profileError);
         // Return auth user as fallback
         return { user: user as User, error: null };
       }
