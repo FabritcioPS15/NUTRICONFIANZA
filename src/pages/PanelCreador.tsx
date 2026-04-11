@@ -15,7 +15,8 @@ import {
   XCircle,
   Lock,
   KeyRound,
-  LogOut
+  LogOut,
+  Trash2
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { supabase } from '../lib/supabase/client';
@@ -128,20 +129,43 @@ export function PanelCreador() {
   };
 
   const startEdit = (post: any) => {
-    setEditId(post.id);
-    setTitle(post.title || '');
-    setAuthorName(post.author_name || '');
-    setContentType(post.content_type || 'video');
-    setSelectedCategory(post.category || 'General');
+    console.log('Click en post:', post);
+    console.log('Content type:', post.content_type);
+    console.log('ID:', post.id);
     
-    if (post.media_url?.includes('supabase.co')) {
-      setUploadType('file');
-      setUploadedUrl(post.media_url);
+    if (post.content_type === 'video') {
+      console.log('Navegando a editar video:', `/edit-video/${post.id}`);
+      navigate(`/edit-video/${post.id}`);
+    } else if (post.content_type === 'flyer') {
+      console.log('Navegando a editar flyer:', `/edit-flyer/${post.id}`);
+      navigate(`/edit-flyer/${post.id}`);
     } else {
-      setUploadType('link');
-      setLinkUrl(post.media_url || '');
+      console.log('Tipo de contenido no reconocido:', post.content_type);
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const deletePost = async (postId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!confirm('¿Estás seguro de que quieres eliminar este contenido? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase.rpc('delete_creator_content', {
+        p_id: postId,
+      });
+
+      if (error) throw error;
+
+      // Recargar la lista de posts
+      fetchRecentPosts();
+      alert('Contenido eliminado correctamente');
+    } catch (err) {
+      console.error('Error al eliminar:', err);
+      alert('Error al eliminar el contenido');
+    }
   };
 
   const cancelEdit = () => {
@@ -479,7 +503,12 @@ export function PanelCreador() {
                 recentPosts.map(post => (
                   <div 
                     key={post.id} 
-                    onClick={() => startEdit(post)}
+                    onClick={(e) => {
+                      console.log('CLICK EN DIV - post:', post);
+                      e.preventDefault();
+                      e.stopPropagation();
+                      startEdit(post);
+                    }}
                     className={cn(
                       "flex gap-4 items-center group cursor-pointer p-4 rounded-[2rem] border transition-all",
                       editId === post.id ? "bg-[#e0efd5] border-[#246b38]" : "bg-gray-50 border-transparent hover:border-[#e0efd5]"
@@ -496,6 +525,10 @@ export function PanelCreador() {
                            {post.category}
                          </span>
                          <Edit2 className="w-3 h-3 text-gray-300 group-hover:text-[#246b38] ml-auto transition-colors" />
+                         <Trash2 
+                           className="w-3 h-3 text-gray-300 group-hover:text-red-500 transition-colors"
+                           onClick={(e) => deletePost(post.id, e)}
+                         />
                       </div>
                     </div>
                   </div>

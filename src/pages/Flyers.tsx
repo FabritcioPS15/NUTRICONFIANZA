@@ -1,6 +1,7 @@
 import { Download, Bookmark, Eye, Loader2, X, ChevronDown, ArrowUp } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Flyer } from '../types';
 import { supabase } from '../lib/supabase/client';
 import { useAuth } from '../hooks/useAuth';
@@ -20,6 +21,7 @@ const INITIAL_FLYERS: Flyer[] = [
 ];
 
 export function Flyers() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { favorites, addFavorite, removeFavorite } = useFavorites(user?.id || null);
   const { markAsWatched } = useWatched(user?.id || null);
@@ -96,11 +98,10 @@ export function Flyers() {
     return favorites.some(f => f.content_id === id);
   };
 
-  useEffect(() => {
-    if (viewingFlyer && user?.id) {
-      markAsWatched(String(viewingFlyer.id), 'flyer');
-    }
-  }, [viewingFlyer, user?.id, markAsWatched]);
+  const handleViewFlyer = (flyer: Flyer) => {
+    markAsWatched(String(flyer.id), 'flyer');
+    navigate(`/view-flyer/${flyer.id}`);
+  };
 
   return (
     <div className="py-8 animate-fade-in-up">
@@ -208,7 +209,7 @@ export function Flyers() {
                 {/* Regular Flyers Grid */}
                 {flyersList.map((flyer) => (
                    <div key={flyer.id} className="bg-white rounded-[3rem] overflow-hidden border border-gray-100 shadow-sm flex flex-col group">
-                      <div className="h-64 bg-gray-100 relative overflow-hidden cursor-pointer" onClick={() => setViewingFlyer(flyer)}>
+                      <div className="h-64 bg-gray-100 relative overflow-hidden cursor-pointer" onClick={() => handleViewFlyer(flyer)}>
                          <img src={flyer.img} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={flyer.title} />
                          <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                            <Eye className="w-8 h-8 text-white" />
@@ -228,8 +229,8 @@ export function Flyers() {
                            <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">{flyer.tag}</span>
                            <h3 className="text-xl font-bold text-[#1a1a1a] mt-1">{flyer.title}</h3>
                          </div>
-                         <button 
-                           onClick={() => setViewingFlyer(flyer)}
+                         <button
+                           onClick={() => handleViewFlyer(flyer)}
                            className="mt-auto w-full bg-[#1a4d2e] hover:bg-[#123820] text-white py-4 rounded-[1.5rem] font-bold text-sm flex justify-center items-center gap-2 transition-all hover:scale-[1.02]"
                          >
                            Ver Recurso

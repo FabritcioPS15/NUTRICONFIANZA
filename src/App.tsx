@@ -10,6 +10,10 @@ import { PanelCreador } from './pages/PanelCreador';
 import { Admin } from './pages/Admin';
 import { Login } from './pages/Login';
 import { Registro } from './pages/Registro';
+import { ViewVideo } from './pages/ViewVideo';
+import { ViewFlyer } from './pages/ViewFlyer';
+import { EditVideo } from './pages/EditVideo';
+import { EditFlyer } from './pages/EditFlyer';
 import { ScrollToTop } from './components/layout/ScrollToTop';
 
 function App() {
@@ -28,6 +32,10 @@ function App() {
           <Route path="creador" element={<PanelCreador />} />
           <Route path="admin" element={<Admin />} />
           <Route path="perfil" element={<Perfil />} />
+          <Route path="view-video/:id" element={<ViewVideo />} />
+          <Route path="view-flyer/:id" element={<ViewFlyer />} />
+          <Route path="edit-video/:id" element={<EditVideo />} />
+          <Route path="edit-flyer/:id" element={<EditFlyer />} />
         </Route>
       </Routes>
     </Router>

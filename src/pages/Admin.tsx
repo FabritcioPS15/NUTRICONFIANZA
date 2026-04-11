@@ -7,9 +7,9 @@ import { UserProfile } from '../types/user';
 import { UserRole } from '../types/auth';
 
 export function Admin() {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, profileLoaded } = useAuth();
   const { users, stats, loading, error, getAllUsers, updateUserRole, updateUserPlan, deleteUser, getUserStats } = useAdmin();
-  
+
   const [filters, setFilters] = useState<{ role?: UserRole; search?: string; plan?: string }>({});
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [showRoleModal, setShowRoleModal] = useState(false);
@@ -42,6 +42,14 @@ export function Admin() {
       default: return <UserIcon className="w-4 h-4" />;
     }
   };
+
+  if (!profileLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="w-8 h-8 text-[#246b38] animate-spin" />
+      </div>
+    );
+  }
 
   if (!currentUser || currentUser.role !== 'super_admin') {
     return (

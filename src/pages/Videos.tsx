@@ -1,6 +1,7 @@
 import { Play, Loader2, X, Bookmark, ChevronDown } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Video } from '../types';
 import { supabase } from '../lib/supabase/client';
 import { useAuth } from '../hooks/useAuth';
@@ -20,6 +21,7 @@ const INITIAL_VIDEOS: Video[] = [
 ];
 
 export function Videos() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { favorites, addFavorite, removeFavorite } = useFavorites(user?.id || null);
   const { markAsWatched } = useWatched(user?.id || null);
@@ -39,6 +41,11 @@ export function Videos() {
       markAsWatched(String(playingVideo.id), 'video');
     }
   }, [playingVideo, user?.id, markAsWatched]);
+
+  const handleViewVideo = (video: Video) => {
+    markAsWatched(String(video.id), 'video');
+    navigate(`/view-video/${video.id}`);
+  };
 
   const fetchVideos = async () => {
     try {
@@ -215,9 +222,9 @@ export function Videos() {
             ) : (
               videosList.map((video) => (
                 <div key={video.id} className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-sm group">
-                  <div 
+                  <div
                     className="relative aspect-[16/9] cursor-pointer overflow-hidden"
-                    onClick={() => setPlayingVideo(video)}
+                    onClick={() => handleViewVideo(video)}
                   >
                     <img 
                       src={video.img} 

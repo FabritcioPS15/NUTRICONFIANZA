@@ -9,9 +9,12 @@ export function useAuth() {
     loading: true,
     error: null,
   });
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   const loadUserProfile = async (authUser: User | null) => {
+    console.log('loadUserProfile called with:', authUser?.email, authUser?.role);
     if (!authUser) {
+      setProfileLoaded(true);
       return authUser;
     }
 
@@ -21,6 +24,8 @@ export function useAuth() {
         .select('*')
         .eq('id', authUser.id)
         .single();
+
+      console.log('Profile query result:', { profile, error: profileError });
 
       if (profileError) {
         console.error('Error fetching profile:', profileError);
@@ -39,10 +44,12 @@ export function useAuth() {
         accessibility: profile.accessibility,
       } as User;
 
-      console.log('Loaded user profile:', { email: mergedUser.email, role: mergedUser.role, profileRole: profile.role });
+      console.log('Loaded user profile:', { email: mergedUser.email, role: mergedUser.role, profileRole: profile.role, profile });
+      setProfileLoaded(true);
       return mergedUser;
     } catch (error) {
       console.error('Error loading user profile:', error);
+      setProfileLoaded(true);
       return authUser;
     }
   };
@@ -57,10 +64,12 @@ export function useAuth() {
       setAuthState({ user: userProfile, loading: false, error });
     });
 
-    // Listen for auth changes (sync callback - just update auth state)
-    const { data: { subscription } } = authService.onAuthStateChange((user) => {
+    // Listen for auth changes and load profile
+    const { data: { subscription } } = authService.onAuthStateChange(async (user) => {
       if (!mounted) return;
-      setAuthState({ user, loading: false, error: null });
+      setProfileLoaded(false); // Reset profile loaded state
+      const userProfile = await loadUserProfile(user);
+      setAuthState({ user: userProfile, loading: false, error: null });
     });
 
     return () => {
@@ -97,5 +106,6 @@ export function useAuth() {
     signIn,
     signOut,
     isAuthenticated: !!authState.user,
+    profileLoaded,
   };
 }
