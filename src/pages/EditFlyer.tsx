@@ -157,19 +157,19 @@ export function EditFlyer() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-[#246b38] animate-spin" />
+        <Loader2 className="w-10 h-10 text-[#477d1e] animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#fdfdfd]">
+    <div className="min-h-screen bg-[#8aaa1f]">
       {/* Header */}
       <div className="bg-white border-b border-gray-100 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <button 
             onClick={() => navigate('/creador')}
-            className="flex items-center gap-2 text-gray-400 hover:text-[#246b38] transition-colors"
+            className="flex items-center gap-2 text-gray-400 hover:text-[#477d1e] transition-colors"
           >
             <ArrowLeft className="w-5 h-5" /> Volver al Panel
           </button>
@@ -180,7 +180,7 @@ export function EditFlyer() {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white border border-gray-100 rounded-[3rem] p-8 shadow-sm">
           <div className="flex items-center gap-4 mb-8">
-            <div className="w-16 h-16 bg-[#246b38] rounded-2xl flex items-center justify-center">
+            <div className="w-16 h-16 bg-[#477d1e] rounded-2xl flex items-center justify-center">
               <FileText className="w-8 h-8 text-white" />
             </div>
             <div>
@@ -199,7 +199,7 @@ export function EditFlyer() {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 focus:ring-2 focus:ring-[#246b38]/20 focus:border-[#246b38] transition-all outline-none"
+                className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 focus:ring-2 focus:ring-[#477d1e]/20 focus:border-[#477d1e] transition-all outline-none"
                 placeholder="Título del flyer"
               />
             </div>
@@ -213,7 +213,7 @@ export function EditFlyer() {
                 type="text"
                 value={authorName}
                 onChange={(e) => setAuthorName(e.target.value)}
-                className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 focus:ring-2 focus:ring-[#246b38]/20 focus:border-[#246b38] transition-all outline-none"
+                className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 focus:ring-2 focus:ring-[#477d1e]/20 focus:border-[#477d1e] transition-all outline-none"
                 placeholder="Nombre del autor"
               />
             </div>
@@ -226,7 +226,7 @@ export function EditFlyer() {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 focus:ring-2 focus:ring-[#246b38]/20 focus:border-[#246b38] transition-all outline-none"
+                className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 focus:ring-2 focus:ring-[#477d1e]/20 focus:border-[#477d1e] transition-all outline-none"
               >
                 <option value="Diabetes">Diabetes</option>
                 <option value="Hipertensión">Hipertensión</option>
@@ -240,7 +240,7 @@ export function EditFlyer() {
               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2 block">
                 Thumbnail (Imagen de vista previa)
               </label>
-              <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-[#246b38] transition-colors">
+              <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-[#477d1e] transition-colors">
                 <input
                   type="file"
                   accept="image/*"
@@ -265,13 +265,13 @@ export function EditFlyer() {
             <div className="flex gap-4">
               <button
                 onClick={() => setUploadType('file')}
-                className={`px-6 py-3 rounded-xl font-bold transition-all ${uploadType === 'file' ? 'bg-[#246b38] text-white' : 'bg-gray-100 text-gray-600'}`}
+                className={`px-6 py-3 rounded-xl font-bold transition-all ${uploadType === 'file' ? 'bg-[#477d1e] text-white' : 'bg-gray-100 text-gray-600'}`}
               >
                 Subir Archivo
               </button>
               <button
                 onClick={() => setUploadType('link')}
-                className={`px-6 py-3 rounded-xl font-bold transition-all ${uploadType === 'link' ? 'bg-[#246b38] text-white' : 'bg-gray-100 text-gray-600'}`}
+                className={`px-6 py-3 rounded-xl font-bold transition-all ${uploadType === 'link' ? 'bg-[#477d1e] text-white' : 'bg-gray-100 text-gray-600'}`}
               >
                 Link Social
               </button>
@@ -283,7 +283,7 @@ export function EditFlyer() {
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2 block">
                   Archivo de Imagen
                 </label>
-                <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-[#246b38] transition-colors">
+                <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-[#477d1e] transition-colors">
                   <input
                     type="file"
                     accept="image/*"
@@ -308,7 +308,7 @@ export function EditFlyer() {
                     type="text"
                     value={mediaUrl}
                     onChange={(e) => setMediaUrl(e.target.value)}
-                    className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 pl-12 pr-4 focus:ring-2 focus:ring-[#246b38]/20 focus:border-[#246b38] transition-all outline-none"
+                    className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 pl-12 pr-4 focus:ring-2 focus:ring-[#477d1e]/20 focus:border-[#477d1e] transition-all outline-none"
                     placeholder="Pega el link de la imagen"
                   />
                   <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -332,7 +332,7 @@ export function EditFlyer() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 bg-[#246b38] hover:bg-[#1a4d2e] text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 bg-[#477d1e] hover:bg-[#477d1e] text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
               {saving ? 'Guardando...' : 'Guardar Cambios'}

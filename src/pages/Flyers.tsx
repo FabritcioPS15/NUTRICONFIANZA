@@ -126,13 +126,13 @@ export function Flyers() {
                     className={cn(
                       "group flex flex-col p-5 rounded-[2rem] transition-all border-2 text-left relative overflow-hidden",
                       isActive 
-                        ? "bg-[#246b38] border-[#246b38] text-white shadow-xl shadow-[#246b38]/20" 
-                        : "bg-white border-gray-50 text-gray-400 hover:border-[#246b38]/20 hover:text-[#246b38]"
+                        ? "bg-[#477d1e] border-[#477d1e] text-white shadow-xl shadow-[#477d1e]/20" 
+                        : "bg-white border-gray-50 text-gray-400 hover:border-[#477d1e]/20 hover:text-[#477d1e]"
                     )}
                    >
                      <div className="flex items-center justify-between z-10">
                        <span className="font-black text-sm uppercase tracking-widest">{filter}</span>
-                       <div className={cn("w-1.5 h-1.5 rounded-full transition-all", isActive ? "bg-white scale-150" : "bg-gray-200 group-hover:bg-[#246b38]")} />
+                       <div className={cn("w-1.5 h-1.5 rounded-full transition-all", isActive ? "bg-white scale-150" : "bg-gray-200 group-hover:bg-[#477d1e]")} />
                      </div>
                      {isActive && <div className="absolute top-0 left-0 w-1.5 h-full bg-white opacity-50" />}
                    </button>
@@ -145,7 +145,7 @@ export function Flyers() {
              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-4">Recurso Premium</span>
              <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
-                   <Download className="w-5 h-5 text-[#246b38]" />
+                   <Download className="w-5 h-5 text-[#477d1e]" />
                 </div>
                 <p className="text-xs font-bold text-gray-600">Todos los PDF están verificados por clínicos.</p>
              </div>
@@ -159,7 +159,7 @@ export function Flyers() {
             <div className="relative group w-full">
               <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-3 bg-white border-2 border-gray-100 px-8 py-5 rounded-[2rem] font-black text-sm text-[#1a1a1a] shadow-sm hover:border-[#246b38]/30 transition-all active:scale-95 w-full justify-between"
+                className="flex items-center gap-3 bg-white border-2 border-gray-100 px-8 py-5 rounded-[2rem] font-black text-sm text-[#1a1a1a] shadow-sm hover:border-[#477d1e]/30 transition-all active:scale-95 w-full justify-between"
               >
                 <div className="flex items-center gap-2">
                    <div className="w-2.5 h-2.5 rounded-full bg-[#3b8751]" />
@@ -182,8 +182,8 @@ export function Flyers() {
                         className={cn(
                           "w-full text-left px-8 py-5 rounded-2xl text-sm font-black transition-all flex items-center justify-between group/item",
                           selectedFilter === filter 
-                            ? "bg-[#246b38] text-white shadow-lg shadow-[#246b38]/20" 
-                            : "text-gray-500 hover:bg-[#e0efd5] hover:text-[#246b38]"
+                            ? "bg-[#477d1e] text-white shadow-lg shadow-[#477d1e]/20" 
+                            : "text-gray-500 hover:bg-[#8aaa1f] hover:text-[#477d1e]"
                         )}
                       >
                         {filter}
@@ -197,7 +197,7 @@ export function Flyers() {
 
           <div className="space-y-12">
             {loading ? (
-              <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 text-[#246b38] animate-spin" /></div>
+              <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 text-[#477d1e] animate-spin" /></div>
             ) : flyersList.length === 0 ? (
               <div className="text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
                  <p className="text-gray-400 font-medium">Buscando más recursos...</p>
@@ -216,7 +216,7 @@ export function Flyers() {
                            onClick={(e) => { e.stopPropagation(); toggleSave(String(flyer.id)); }}
                            className={cn(
                              "absolute top-5 right-5 w-12 h-12 rounded-2xl flex items-center justify-center backdrop-blur-md transition-all shadow-lg",
-                             isFavorite(String(flyer.id)) ? "bg-[#246b38] text-white" : "bg-white/80 text-gray-600 hover:bg-white"
+                             isFavorite(String(flyer.id)) ? "bg-[#477d1e] text-white" : "bg-white/80 text-gray-600 hover:bg-white"
                            )}
                          >
                             <Bookmark className={cn("w-5 h-5", isFavorite(String(flyer.id)) ? "fill-current" : "")} />
@@ -229,7 +229,7 @@ export function Flyers() {
                          </div>
                          <button
                            onClick={() => handleViewFlyer(flyer)}
-                           className="mt-auto w-full bg-[#1a4d2e] hover:bg-[#123820] text-white py-4 rounded-[1.5rem] font-bold text-sm flex justify-center items-center gap-2 transition-all hover:scale-[1.02]"
+                           className="mt-auto w-full bg-[#477d1e] hover:bg-[#123820] text-white py-4 rounded-[1.5rem] font-bold text-sm flex justify-center items-center gap-2 transition-all hover:scale-[1.02]"
                          >
                            Ver Recurso
                          </button>
@@ -296,7 +296,7 @@ export function Flyers() {
                       className={cn(
                         "p-5 rounded-[2rem] font-bold text-sm flex items-center transition-all border",
                         isFavorite(String(viewingFlyer.id))
-                          ? "bg-[#246b38] border-transparent text-white"
+                          ? "bg-[#477d1e] border-transparent text-white"
                           : "bg-white/5 border-white/10 text-white hover:bg-white/10"
                       )}
                     >
@@ -316,7 +316,7 @@ export function Flyers() {
       {showScrollTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-10 right-10 w-14 h-14 bg-[#246b38]/90 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-90 transition-all z-[60] border-4 border-white/20 backdrop-blur-xl animate-in fade-in zoom-in slide-in-from-bottom-5 duration-500"
+          className="fixed bottom-10 right-10 w-14 h-14 bg-[#477d1e]/90 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-90 transition-all z-[60] border-4 border-white/20 backdrop-blur-xl animate-in fade-in zoom-in slide-in-from-bottom-5 duration-500"
           aria-label="Scroll to top"
         >
           <ArrowUp className="w-6 h-6 stroke-[3]" />

@@ -91,7 +91,7 @@ export function Perfil() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-[#246b38] animate-spin" />
+        <Loader2 className="w-10 h-10 text-[#477d1e] animate-spin" />
       </div>
     );
   }
@@ -110,8 +110,8 @@ export function Perfil() {
       {/* Header Profile */}
       <div className="flex flex-col items-center text-center sm:text-left sm:flex-row sm:items-center sm:justify-between gap-6">
         <div className="flex flex-col items-center sm:flex-row sm:items-center gap-4 sm:gap-6">
-          <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-[#e0efd5] border-4 border-white shadow-md flex items-center justify-center">
-            <User className="w-10 h-10 sm:w-14 sm:h-14 text-[#246b38]" />
+          <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-[#8aaa1f] border-4 border-white shadow-md flex items-center justify-center">
+            <User className="w-10 h-10 sm:w-14 sm:h-14 text-[#477d1e]" />
           </div>
           <div>
             <h1 className="text-2xl sm:text-4xl font-bold text-[#1a1a1a] mb-1 tracking-tight">{user.full_name || user.email?.split('@')[0] || 'Usuario'}</h1>
@@ -119,7 +119,7 @@ export function Perfil() {
           </div>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-          <button className="flex-1 sm:flex-none justify-center bg-[#cce3d1] hover:bg-[#b5d5bd] tracking-wide text-[#246b38] px-5 sm:px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 transition-colors">
+          <button className="flex-1 sm:flex-none justify-center bg-[#8aaa1f] hover:bg-[#b5d5bd] tracking-wide text-[#477d1e] px-5 sm:px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 transition-colors">
             <Edit3 className="w-4 h-4" /> Editar Perfil
           </button>
           <button 
@@ -136,7 +136,7 @@ export function Perfil() {
         <div className="w-full lg:w-80 space-y-6 flex-shrink-0">
           <div className="bg-white border border-gray-100 shadow-sm rounded-3xl p-5 sm:p-8">
             <h3 className="flex items-center gap-3 font-bold text-base sm:text-lg mb-6 sm:mb-8 text-[#1a1a1a]">
-              <User className="w-5 h-5 text-[#246b38] fill-current" /> Datos Personales
+              <User className="w-5 h-5 text-[#477d1e] fill-current" /> Datos Personales
             </h3>
             
             <div className="space-y-4 sm:space-y-6">
@@ -165,7 +165,7 @@ export function Perfil() {
           </div>
 
           {/* Suscripción / Membresía */}
-          <div className="bg-gradient-to-br from-[#246b38] to-[#1a4d2e] rounded-3xl p-5 sm:p-8 text-white shadow-lg">
+          <div className="bg-gradient-to-br from-[#477d1e] to-[#477d1e] rounded-3xl p-5 sm:p-8 text-white shadow-lg">
             <h3 className="flex items-center gap-3 font-bold text-base sm:text-lg mb-6 sm:mb-8">
               <Crown className="w-5 h-5" /> Mi Membresía
             </h3>
@@ -220,7 +220,7 @@ export function Perfil() {
               <div className="text-center py-4">
                 <CreditCard className="w-8 h-8 mx-auto mb-2 opacity-75" />
                 <p className="text-sm font-medium opacity-90 mb-3">Sin suscripción activa</p>
-                <button onClick={() => navigate('/planes')} className="bg-white text-[#246b38] px-4 py-2 rounded-full text-xs font-bold hover:bg-[#cce3d1] transition-colors">
+                <button onClick={() => navigate('/planes')} className="bg-white text-[#477d1e] px-4 py-2 rounded-full text-xs font-bold hover:bg-[#8aaa1f] transition-colors">
                   Ver Planes
                 </button>
               </div>
@@ -229,19 +229,19 @@ export function Perfil() {
 
           <div className="bg-[#f5f5f5] rounded-3xl p-5 sm:p-8">
             <h3 className="flex items-center gap-3 font-bold text-base sm:text-lg mb-6 sm:mb-8 text-[#1a1a1a]">
-              <Eye className="w-5 h-5 text-[#246b38] fill-current" /> Accesibilidad
+              <Eye className="w-5 h-5 text-[#477d1e] fill-current" /> Accesibilidad
             </h3>
             
             <div className="space-y-4 sm:space-y-6">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-700">Texto Grande</span>
-                <button onClick={() => setLargeText(!largeText)} className={cn("w-12 h-6 rounded-full transition-colors relative", largeText ? "bg-[#246b38]" : "bg-gray-300")}>
+                <button onClick={() => setLargeText(!largeText)} className={cn("w-12 h-6 rounded-full transition-colors relative", largeText ? "bg-[#477d1e]" : "bg-gray-300")}>
                   <div className={cn("w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all shadow", largeText ? "left-6" : "left-0.5")} />
                 </button>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-700">Alto Contraste</span>
-                <button onClick={() => setHighContrast(!highContrast)} className={cn("w-12 h-6 rounded-full transition-colors relative", highContrast ? "bg-[#246b38]" : "bg-gray-300")}>
+                <button onClick={() => setHighContrast(!highContrast)} className={cn("w-12 h-6 rounded-full transition-colors relative", highContrast ? "bg-[#477d1e]" : "bg-gray-300")}>
                   <div className={cn("w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all shadow", highContrast ? "left-6" : "left-0.5")} />
                 </button>
               </div>
@@ -259,27 +259,27 @@ export function Perfil() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div
                 onClick={() => setShowFavorites(!showFavorites)}
-                className="bg-white border border-gray-100 shadow-sm rounded-3xl p-4 sm:p-6 text-center cursor-pointer hover:shadow-md transition-all hover:border-[#246b38]/30"
+                className="bg-white border border-gray-100 shadow-sm rounded-3xl p-4 sm:p-6 text-center cursor-pointer hover:shadow-md transition-all hover:border-[#477d1e]/30"
               >
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#e0efd5] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                  <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-[#246b38] fill-current" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#8aaa1f] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-[#477d1e] fill-current" />
                 </div>
                 <h3 className="font-bold text-base sm:text-lg mb-2">Contenido Guardado</h3>
                 <p className="text-gray-500 text-xs sm:text-sm">Guarda tus videos y flyers preferidos</p>
-                <div className="mt-3 sm:mt-4 text-xl sm:text-2xl font-bold text-[#246b38]">{favoritesCount}</div>
+                <div className="mt-3 sm:mt-4 text-xl sm:text-2xl font-bold text-[#477d1e]">{favoritesCount}</div>
                 <p className="text-xs text-gray-400">Elementos guardados</p>
               </div>
 
               <div
                 onClick={() => setShowWatched(!showWatched)}
-                className="bg-white border border-gray-100 shadow-sm rounded-3xl p-4 sm:p-6 text-center cursor-pointer hover:shadow-md transition-all hover:border-[#246b38]/30"
+                className="bg-white border border-gray-100 shadow-sm rounded-3xl p-4 sm:p-6 text-center cursor-pointer hover:shadow-md transition-all hover:border-[#477d1e]/30"
               >
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#cce3d1] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                  <MessageSquare className="w-6 h-6 sm:w-8 sm:h-8 text-[#246b38]" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#8aaa1f] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <MessageSquare className="w-6 h-6 sm:w-8 sm:h-8 text-[#477d1e]" />
                 </div>
                 <h3 className="font-bold text-base sm:text-lg mb-2">Mi Comunidad</h3>
                 <p className="text-gray-500 text-xs sm:text-sm">Likes, posts e interacción</p>
-                <div className="mt-3 sm:mt-4 text-xl sm:text-2xl font-bold text-[#246b38]">{communityStatsLoading ? '...' : communityStats.likesGiven + communityStats.postsCreated}</div>
+                <div className="mt-3 sm:mt-4 text-xl sm:text-2xl font-bold text-[#477d1e]">{communityStatsLoading ? '...' : communityStats.likesGiven + communityStats.postsCreated}</div>
                 <p className="text-xs text-gray-400">Interacciones totales</p>
               </div>
             </div>
@@ -298,14 +298,14 @@ export function Perfil() {
                         <div
                           key={fav.id}
                           onClick={() => navigate(fav.content_type === 'video' ? '/videos' : '/flyers')}
-                          className="bg-gray-50 border border-gray-100 rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all hover:border-[#246b38]/20"
+                          className="bg-gray-50 border border-gray-100 rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all hover:border-[#477d1e]/20"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-16 h-16 bg-[#e0efd5] rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            <div className="w-16 h-16 bg-[#8aaa1f] rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                               {content?.thumbnail_url ? (
                                 <img src={content.thumbnail_url} alt="" className="w-full h-full object-cover" />
                               ) : (
-                                <Heart className="w-6 h-6 text-[#246b38] fill-current" />
+                                <Heart className="w-6 h-6 text-[#477d1e] fill-current" />
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -327,29 +327,29 @@ export function Perfil() {
                 <h3 className="text-lg font-bold text-[#1a1a1a] mb-4">Estadísticas de Comunidad</h3>
                 {communityStatsLoading ? (
                   <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin text-[#246b38]" />
+                    <Loader2 className="w-6 h-6 animate-spin text-[#477d1e]" />
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-center">
-                      <div className="w-12 h-12 bg-[#e0efd5] rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Heart className="w-6 h-6 text-[#246b38] fill-current" />
+                      <div className="w-12 h-12 bg-[#8aaa1f] rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Heart className="w-6 h-6 text-[#477d1e] fill-current" />
                       </div>
-                      <div className="text-2xl font-bold text-[#246b38] mb-1">{communityStats.likesGiven}</div>
+                      <div className="text-2xl font-bold text-[#477d1e] mb-1">{communityStats.likesGiven}</div>
                       <p className="text-xs text-gray-500">Likes dados</p>
                     </div>
                     <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-center">
-                      <div className="w-12 h-12 bg-[#cce3d1] rounded-full flex items-center justify-center mx-auto mb-3">
-                        <MessageSquare className="w-6 h-6 text-[#246b38]" />
+                      <div className="w-12 h-12 bg-[#8aaa1f] rounded-full flex items-center justify-center mx-auto mb-3">
+                        <MessageSquare className="w-6 h-6 text-[#477d1e]" />
                       </div>
-                      <div className="text-2xl font-bold text-[#246b38] mb-1">{communityStats.postsCreated}</div>
+                      <div className="text-2xl font-bold text-[#477d1e] mb-1">{communityStats.postsCreated}</div>
                       <p className="text-xs text-gray-500">Posts creados</p>
                     </div>
                     <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-center">
                       <div className="w-12 h-12 bg-[#f0d4d4] rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Bookmark className="w-6 h-6 text-[#246b38]" />
+                        <Bookmark className="w-6 h-6 text-[#477d1e]" />
                       </div>
-                      <div className="text-2xl font-bold text-[#246b38] mb-1">{communityStats.postsSaved}</div>
+                      <div className="text-2xl font-bold text-[#477d1e] mb-1">{communityStats.postsSaved}</div>
                       <p className="text-xs text-gray-500">Posts guardados</p>
                     </div>
                   </div>
@@ -371,14 +371,14 @@ export function Perfil() {
                       <div
                         key={fav.id}
                         onClick={() => navigate(fav.content_type === 'video' ? '/videos' : '/flyers')}
-                        className="bg-white border border-gray-100 rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all hover:border-[#246b38]/20"
+                        className="bg-white border border-gray-100 rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all hover:border-[#477d1e]/20"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-16 h-16 bg-[#e0efd5] rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          <div className="w-16 h-16 bg-[#8aaa1f] rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                             {content?.thumbnail_url ? (
                               <img src={content.thumbnail_url} alt="" className="w-full h-full object-cover" />
                             ) : (
-                              <Heart className="w-6 h-6 text-[#246b38] fill-current" />
+                              <Heart className="w-6 h-6 text-[#477d1e] fill-current" />
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -395,14 +395,14 @@ export function Perfil() {
                       <div
                         key={w.id}
                         onClick={() => navigate(w.content_type === 'video' ? '/videos' : '/flyers')}
-                        className="bg-white border border-gray-100 rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all hover:border-[#246b38]/20"
+                        className="bg-white border border-gray-100 rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all hover:border-[#477d1e]/20"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-16 h-16 bg-[#cce3d1] rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          <div className="w-16 h-16 bg-[#8aaa1f] rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                             {content?.thumbnail_url ? (
                               <img src={content.thumbnail_url} alt="" className="w-full h-full object-cover" />
                             ) : (
-                              <Eye className="w-6 h-6 text-[#246b38]" />
+                              <Eye className="w-6 h-6 text-[#477d1e]" />
                             )}
                           </div>
                           <div className="flex-1 min-w-0">

@@ -118,7 +118,7 @@ export function Videos() {
         {/* Sidebar - Integrated Filters for Desktop */}
         <div className="w-full lg:w-[320px] flex-shrink-0 space-y-12">
           <div>
-            <h1 className="text-3xl md:text-5xl font-black text-[#246b38] leading-tight mb-6 tracking-tighter">
+            <h1 className="text-3xl md:text-5xl font-black text-[#477d1e] leading-tight mb-6 tracking-tighter">
               Curaduría de Bienestar
             </h1>
             <p className="text-gray-500 font-medium leading-relaxed mb-10">
@@ -137,13 +137,13 @@ export function Videos() {
                     className={cn(
                       "group flex flex-col p-5 rounded-[2rem] transition-all border-2 text-left relative overflow-hidden",
                       isActive 
-                        ? "bg-[#246b38] border-[#246b38] text-white shadow-xl shadow-[#246b38]/20" 
-                        : "bg-white border-gray-50 text-gray-400 hover:border-[#246b38]/20 hover:text-[#246b38]"
+                        ? "bg-[#477d1e] border-[#477d1e] text-white shadow-xl shadow-[#477d1e]/20" 
+                        : "bg-white border-gray-50 text-gray-400 hover:border-[#477d1e]/20 hover:text-[#477d1e]"
                     )}
                    >
                      <div className="flex items-center justify-between z-10">
                        <span className="font-black text-sm uppercase tracking-widest">{cat}</span>
-                       <div className={cn("w-1.5 h-1.5 rounded-full transition-all", isActive ? "bg-white scale-150" : "bg-gray-200 group-hover:bg-[#246b38]")} />
+                       <div className={cn("w-1.5 h-1.5 rounded-full transition-all", isActive ? "bg-white scale-150" : "bg-gray-200 group-hover:bg-[#477d1e]")} />
                      </div>
                      {isActive && <div className="absolute top-0 left-0 w-1.5 h-full bg-white opacity-50" />}
                    </button>
@@ -153,8 +153,8 @@ export function Videos() {
           </div>
 
           <div className="space-y-6">
-             <div className="bg-[#f2f4f1] p-8 rounded-[2.5rem] border-l-4 border-[#246b38] shadow-sm">
-                <span className="text-[10px] font-black text-[#246b38] uppercase tracking-widest block mb-1">Destacado hoy</span>
+             <div className="bg-[#f2f4f1] p-8 rounded-[2.5rem] border-l-4 border-[#477d1e] shadow-sm">
+                <span className="text-[10px] font-black text-[#477d1e] uppercase tracking-widest block mb-1">Destacado hoy</span>
                 <p className="text-xs font-bold text-gray-400 leading-relaxed">Control glucémico: Mitos y realidades en la alimentación diaria.</p>
              </div>
              <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm opacity-60">
@@ -172,13 +172,13 @@ export function Videos() {
               <div className="relative group w-full">
                 <button 
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-3 bg-white border-2 border-gray-100 px-8 py-5 rounded-[2rem] font-black text-sm text-[#1a1a1a] shadow-sm hover:border-[#246b38]/30 transition-all active:scale-95 w-full justify-between"
+                  className="flex items-center gap-3 bg-white border-2 border-gray-100 px-8 py-5 rounded-[2rem] font-black text-sm text-[#1a1a1a] shadow-sm hover:border-[#477d1e]/30 transition-all active:scale-95 w-full justify-between"
                 >
                   <div className="flex items-center gap-2">
-                     <div className="w-2.5 h-2.5 rounded-full bg-[#246b38]" />
+                     <div className="w-2.5 h-2.5 rounded-full bg-[#477d1e]" />
                      Explorar: {selectedCategory}
                   </div>
-                  <ChevronDown className={cn("w-5 h-5 text-[#246b38] transition-transform", isDropdownOpen && "rotate-180")} />
+                  <ChevronDown className={cn("w-5 h-5 text-[#477d1e] transition-transform", isDropdownOpen && "rotate-180")} />
                 </button>
                 
                 {isDropdownOpen && (
@@ -195,8 +195,8 @@ export function Videos() {
                           className={cn(
                             "w-full text-left px-8 py-5 rounded-2xl text-sm font-black transition-all flex items-center justify-between group/item",
                             selectedCategory === cat 
-                              ? "bg-[#246b38] text-white shadow-lg shadow-[#246b38]/20" 
-                              : "text-gray-500 hover:bg-[#e0efd5] hover:text-[#246b38]"
+                              ? "bg-[#477d1e] text-white shadow-lg shadow-[#477d1e]/20" 
+                              : "text-gray-500 hover:bg-[#8aaa1f] hover:text-[#477d1e]"
                           )}
                         >
                           {cat}
@@ -212,7 +212,7 @@ export function Videos() {
           {/* Video List */}
           <div className="space-y-8">
             {loading ? (
-              <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 text-[#246b38] animate-spin" /></div>
+              <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 text-[#477d1e] animate-spin" /></div>
             ) : videosList.length === 0 ? (
               <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
                 <p className="text-gray-400 font-medium">Próximamente más videos.</p>
@@ -239,7 +239,7 @@ export function Videos() {
                   <div className="p-6 md:p-8">
                     <div className="flex flex-col md:flex-row justify-between items-start mb-4 gap-4">
                       <div>
-                        <span className="text-[9px] font-black uppercase tracking-widest text-[#246b38] bg-[#e0efd5] px-3 py-1 rounded-lg mb-3 inline-block">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[#477d1e] bg-[#8aaa1f] px-3 py-1 rounded-lg mb-3 inline-block">
                           {video.category}
                         </span>
                         <h2 className="text-xl md:text-2xl font-black text-[#1a1a1a] mb-2 leading-tight">{video.title}</h2>
@@ -250,7 +250,7 @@ export function Videos() {
                            onClick={() => toggleSave(String(video.id))}
                            className={cn(
                              "p-4 rounded-2xl transition-all shadow-sm",
-                             isFavorite(String(video.id)) ? "bg-[#246b38] text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                             isFavorite(String(video.id)) ? "bg-[#477d1e] text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                            )}
                          >
                            <Bookmark className={cn("w-5 h-5", isFavorite(String(video.id)) ? "fill-current" : "")} />

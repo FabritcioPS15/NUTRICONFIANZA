@@ -46,7 +46,7 @@ export function Admin() {
   if (!profileLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 text-[#246b38] animate-spin" />
+        <Loader2 className="w-8 h-8 text-[#477d1e] animate-spin" />
       </div>
     );
   }
@@ -69,7 +69,7 @@ export function Admin() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <Shield className="w-8 h-8 text-[#246b38]" />
+            <Shield className="w-8 h-8 text-[#477d1e]" />
             <h1 className="text-3xl font-bold text-gray-900">Panel de Administración</h1>
           </div>
           <p className="text-gray-600">Gestiona usuarios, roles y planes de suscripción</p>
@@ -80,7 +80,7 @@ export function Admin() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
               <div className="flex items-center justify-between mb-4">
-                <Users className="w-8 h-8 text-[#246b38]" />
+                <Users className="w-8 h-8 text-[#477d1e]" />
                 <span className="text-2xl font-bold text-gray-900">{stats.total_users}</span>
               </div>
               <p className="text-sm text-gray-600">Total de Usuarios</p>
@@ -123,7 +123,7 @@ export function Admin() {
                   placeholder="Buscar por nombre..."
                   value={filters.search || ''}
                   onChange={(e) => handleFilterChange('search', e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#246b38]"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#477d1e]"
                 />
               </div>
             </div>
@@ -131,7 +131,7 @@ export function Admin() {
             <select
               value={filters.role || ''}
               onChange={(e) => handleFilterChange('role', e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#246b38]"
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#477d1e]"
             >
               <option value="">Todos los roles</option>
               <option value="super_admin">Super Admin</option>
@@ -143,7 +143,7 @@ export function Admin() {
             <select
               value={filters.plan || ''}
               onChange={(e) => handleFilterChange('plan', e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#246b38]"
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#477d1e]"
             >
               <option value="">Todos los planes</option>
               <option value="Premium">Premium</option>
@@ -160,7 +160,7 @@ export function Admin() {
 
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 text-[#246b38] animate-spin" />
+              <Loader2 className="w-8 h-8 text-[#477d1e] animate-spin" />
             </div>
           ) : error ? (
             <div className="p-6 text-center text-red-600">
@@ -196,8 +196,8 @@ export function Admin() {
                     <tr key={user.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="w-10 h-10 rounded-full bg-[#cce3d1] flex items-center justify-center">
-                            <span className="text-sm font-medium text-[#246b38]">
+                          <div className="w-10 h-10 rounded-full bg-[#8aaa1f] flex items-center justify-center">
+                            <span className="text-sm font-medium text-[#477d1e]">
                               {user.full_name?.charAt(0) || 'U'}
                             </span>
                           </div>
@@ -283,7 +283,7 @@ export function Admin() {
                 </button>
                 <button
                   onClick={() => setShowRoleModal(false)}
-                  className="flex-1 px-4 py-2 bg-[#246b38] text-white rounded-lg hover:bg-[#1a5a2e]"
+                  className="flex-1 px-4 py-2 bg-[#477d1e] text-white rounded-lg hover:bg-[#477d1e]"
                 >
                   Guardar
                 </button>
@@ -317,7 +317,7 @@ export function Admin() {
                 </button>
                 <button
                   onClick={() => setShowPlanModal(false)}
-                  className="flex-1 px-4 py-2 bg-[#246b38] text-white rounded-lg hover:bg-[#1a5a2e]"
+                  className="flex-1 px-4 py-2 bg-[#477d1e] text-white rounded-lg hover:bg-[#477d1e]"
                 >
                   Guardar
                 </button>

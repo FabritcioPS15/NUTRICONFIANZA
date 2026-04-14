@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { User, ShieldPlus, Menu, X, ArrowRight } from 'lucide-react';
+import { User, Menu, X, ArrowRight } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
@@ -43,11 +43,13 @@ export function Navbar() {
       )}>
         {/* Brand */}
         <Link to="/" className="flex items-center gap-2 group relative z-[110]">
-          <div className="w-9 h-9 md:w-10 md:h-10 bg-[#246b38] rounded-xl flex items-center justify-center shadow-lg shadow-[#246b38]/20 group-hover:rotate-12 transition-transform">
-             <ShieldPlus className="w-5 h-5 md:w-6 md:h-6 text-white" />
-          </div>
+          <img 
+            src="/logos/NutriconfianzaLogo.png" 
+            alt="Nutriconfianza Logo" 
+            className="w-9 h-9 md:w-10 md:h-10 object-contain group-hover:rotate-12 transition-transform"
+          />
           <span className="text-lg md:text-xl font-black text-[#1a1a1a] tracking-tighter">
-            NUTRI<span className="text-[#246b38]">CONFIANZA</span>
+            NUTRI<span className="text-[#477d1e]">CONFIANZA</span>
           </span>
         </Link>
 
@@ -62,8 +64,8 @@ export function Navbar() {
                 className={cn(
                   "px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-300 border-2",
                   isActive 
-                    ? "bg-[#246b38] text-white border-[#246b38] shadow-md shadow-[#246b38]/20" 
-                    : "text-gray-400 border-transparent hover:text-[#246b38] hover:border-[#246b38]/30 hover:bg-white"
+                    ? "bg-[#477d1e] text-white border-[#477d1e] shadow-md shadow-[#477d1e]/20" 
+                    : "text-gray-400 border-transparent hover:text-[#477d1e] hover:border-[#477d1e]/30 hover:bg-white"
                 )}
               >
                 {link.name}
@@ -78,7 +80,7 @@ export function Navbar() {
             to="/perfil" 
             className={cn(
               "p-3 rounded-2xl transition-all group",
-              location.pathname === '/perfil' ? "bg-[#e0efd5] text-[#246b38]" : "bg-gray-100/50 text-gray-400 hover:bg-[#e0efd5] hover:text-[#246b38]"
+              location.pathname === '/perfil' ? "bg-[#8aaa1f] text-[#477d1e]" : "bg-gray-100/50 text-gray-400 hover:bg-[#8aaa1f] hover:text-[#477d1e]"
             )}
           >
             <User className="w-5 h-5" />
@@ -86,7 +88,7 @@ export function Navbar() {
           
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden p-3 bg-gray-100/50 rounded-2xl text-[#246b38] hover:bg-[#e0efd5] transition-colors"
+            className="lg:hidden p-3 bg-gray-100/50 rounded-2xl text-[#477d1e] hover:bg-[#8aaa1f] transition-colors"
           >
              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -104,14 +106,16 @@ export function Navbar() {
         {/* Header inside menu to allow closing */}
         <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-[160]">
              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-[#246b38] rounded-lg flex items-center justify-center">
-                   <ShieldPlus className="w-5 h-5 text-white" />
-                </div>
+                <img 
+                  src="/logos/NutriconfianzaLogo.png" 
+                  alt="Nutriconfianza Logo" 
+                  className="w-8 h-8 object-contain"
+                />
                 <span className="text-sm font-black text-[#1a1a1a] tracking-tighter uppercase">Menú</span>
              </div>
              <button 
                 onClick={() => setIsMenuOpen(false)}
-                className="p-4 bg-gray-100 rounded-2xl text-[#246b38] hover:bg-[#e0efd5] transition-all active:scale-90"
+                className="p-4 bg-gray-100 rounded-2xl text-[#477d1e] hover:bg-[#8aaa1f] transition-all active:scale-90"
               >
                  <X className="w-6 h-6" />
               </button>
@@ -133,8 +137,8 @@ export function Navbar() {
                   className={cn(
                     "flex items-center justify-between p-6 rounded-[2rem] text-xl font-black transition-all border-4",
                     isActive 
-                      ? "bg-[#246b38] text-white border-[#246b38] shadow-2xl shadow-[#246b38]/30 scale-105" 
-                      : "text-gray-400 border-transparent hover:text-[#246b38] hover:border-[#246b38]/10"
+                      ? "bg-[#477d1e] text-white border-[#477d1e] shadow-2xl shadow-[#477d1e]/30 scale-105" 
+                      : "text-gray-400 border-transparent hover:text-[#477d1e] hover:border-[#477d1e]/10"
                   )}
                  >
                    {link.name}
@@ -152,8 +156,8 @@ export function Navbar() {
                   className={cn(
                     "flex items-center justify-between p-6 rounded-[2rem] text-xl font-black transition-all border-4",
                     location.pathname === '/login'
-                      ? "bg-[#246b38] text-white border-[#246b38] shadow-2xl shadow-[#246b38]/30 scale-105" 
-                      : "text-gray-400 border-transparent hover:text-[#246b38] hover:border-[#246b38]/10"
+                      ? "bg-[#477d1e] text-white border-[#477d1e] shadow-2xl shadow-[#477d1e]/30 scale-105" 
+                      : "text-gray-400 border-transparent hover:text-[#477d1e] hover:border-[#477d1e]/10"
                   )}
                  >
                    Iniciar Sesión
@@ -165,8 +169,8 @@ export function Navbar() {
                   className={cn(
                     "flex items-center justify-between p-6 rounded-[2rem] text-xl font-black transition-all border-4",
                     location.pathname === '/registro'
-                      ? "bg-[#246b38] text-white border-[#246b38] shadow-2xl shadow-[#246b38]/30 scale-105" 
-                      : "text-gray-400 border-transparent hover:text-[#246b38] hover:border-[#246b38]/10"
+                      ? "bg-[#477d1e] text-white border-[#477d1e] shadow-2xl shadow-[#477d1e]/30 scale-105" 
+                      : "text-gray-400 border-transparent hover:text-[#477d1e] hover:border-[#477d1e]/10"
                   )}
                  >
                    Registrarse
@@ -180,8 +184,8 @@ export function Navbar() {
                 className={cn(
                   "flex items-center justify-between p-6 rounded-[2rem] text-xl font-black transition-all border-4",
                   location.pathname === '/perfil'
-                    ? "bg-[#246b38] text-white border-[#246b38] shadow-2xl shadow-[#246b38]/30 scale-105" 
-                    : "text-gray-400 border-transparent hover:text-[#246b38] hover:border-[#246b38]/10"
+                    ? "bg-[#477d1e] text-white border-[#477d1e] shadow-2xl shadow-[#477d1e]/30 scale-105" 
+                    : "text-gray-400 border-transparent hover:text-[#477d1e] hover:border-[#477d1e]/10"
                 )}
                >
                  Mi Perfil
@@ -194,7 +198,7 @@ export function Navbar() {
               <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.5em] mb-4">Nutriconfianza &copy; 2024</p>
               <div className="flex justify-center gap-4">
                  <div className="w-1.5 h-1.5 rounded-full bg-gray-200" />
-                 <div className="w-1.5 h-1.5 rounded-full bg-[#246b38]" />
+                 <div className="w-1.5 h-1.5 rounded-full bg-[#477d1e]" />
                  <div className="w-1.5 h-1.5 rounded-full bg-gray-200" />
               </div>
            </div>

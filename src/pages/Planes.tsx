@@ -55,7 +55,7 @@ export function Planes() {
   if (plansLoading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-[#246b38] animate-spin" />
+        <Loader2 className="w-10 h-10 text-[#477d1e] animate-spin" />
       </div>
     );
   }
@@ -66,7 +66,7 @@ export function Planes() {
       <div className="mb-8">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-600 hover:text-[#246b38] mb-4 transition-colors"
+          className="flex items-center gap-2 text-gray-600 hover:text-[#477d1e] mb-4 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" /> Volver
         </button>
@@ -89,7 +89,7 @@ export function Planes() {
                 className={cn(
                   "w-full p-4 rounded-2xl border-2 flex items-center gap-4 transition-all",
                   paymentMethod === 'card'
-                    ? "border-[#246b38] bg-[#e0efd5]"
+                    ? "border-[#477d1e] bg-[#8aaa1f]"
                     : "border-gray-200 hover:border-gray-300"
                 )}
               >
@@ -98,7 +98,7 @@ export function Planes() {
                   <p className="font-bold text-[#1a1a1a]">Tarjeta de Crédito/Débito</p>
                   <p className="text-sm text-gray-500">Visa, Mastercard, American Express</p>
                 </div>
-                {paymentMethod === 'card' && <Check className="w-5 h-5 text-[#246b38] ml-auto" />}
+                {paymentMethod === 'card' && <Check className="w-5 h-5 text-[#477d1e] ml-auto" />}
               </button>
 
               <button
@@ -106,7 +106,7 @@ export function Planes() {
                 className={cn(
                   "w-full p-4 rounded-2xl border-2 flex items-center gap-4 transition-all",
                   paymentMethod === 'paypal'
-                    ? "border-[#246b38] bg-[#e0efd5]"
+                    ? "border-[#477d1e] bg-[#8aaa1f]"
                     : "border-gray-200 hover:border-gray-300"
                 )}
               >
@@ -117,7 +117,7 @@ export function Planes() {
                   <p className="font-bold text-[#1a1a1a]">PayPal</p>
                   <p className="text-sm text-gray-500">Pago seguro con PayPal</p>
                 </div>
-                {paymentMethod === 'paypal' && <Check className="w-5 h-5 text-[#246b38] ml-auto" />}
+                {paymentMethod === 'paypal' && <Check className="w-5 h-5 text-[#477d1e] ml-auto" />}
               </button>
             </div>
 
@@ -144,7 +144,7 @@ export function Planes() {
                 onClick={handlePayment}
                 disabled={!paymentMethod || processing}
                 className={cn(
-                  "flex-1 bg-[#246b38] hover:bg-[#1a4d2e] text-white px-6 py-3 rounded-full font-bold transition-colors flex items-center justify-center gap-2",
+                  "flex-1 bg-[#477d1e] hover:bg-[#477d1e] text-white px-6 py-3 rounded-full font-bold transition-colors flex items-center justify-center gap-2",
                   (!paymentMethod || processing) && "opacity-50 cursor-not-allowed"
                 )}
               >
@@ -168,11 +168,11 @@ export function Planes() {
               key={plan.id}
               className={cn(
                 "bg-white border rounded-3xl p-6 shadow-sm transition-all hover:shadow-lg hover:scale-105",
-                plan.is_popular ? "border-[#246b38] border-2 relative" : "border-gray-100"
+                plan.is_popular ? "border-[#477d1e] border-2 relative" : "border-gray-100"
               )}
             >
               {plan.is_popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#246b38] text-white px-4 py-1 rounded-full text-xs font-bold">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#477d1e] text-white px-4 py-1 rounded-full text-xs font-bold">
                   Más Popular
                 </div>
               )}
@@ -195,7 +195,7 @@ export function Planes() {
               <ul className="space-y-3 mb-6">
                 {plan.features.map((feature, idx) => (
                   <li key={idx} className="flex items-center gap-2 text-sm text-gray-700">
-                    <Check className="w-4 h-4 text-[#246b38] flex-shrink-0" />
+                    <Check className="w-4 h-4 text-[#477d1e] flex-shrink-0" />
                     {feature}
                   </li>
                 ))}
@@ -206,8 +206,8 @@ export function Planes() {
                 className={cn(
                   "w-full py-3 rounded-full font-bold transition-all",
                   plan.is_popular
-                    ? "bg-[#246b38] hover:bg-[#1a4d2e] text-white"
-                    : "bg-[#e0efd5] hover:bg-[#cce3d1] text-[#246b38]"
+                    ? "bg-[#477d1e] hover:bg-[#477d1e] text-white"
+                    : "bg-[#8aaa1f] hover:bg-[#8aaa1f] text-[#477d1e]"
                 )}
               >
                 Seleccionar Plan

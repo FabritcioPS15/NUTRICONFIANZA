@@ -14,7 +14,7 @@ const INITIAL_POSTS = [
     user: "María G.",
     time: "Hace 2 horas",
     tag: "Diabetes",
-    avatar: "bg-[#cce3d1]",
+    avatar: "bg-[#8aaa1f]",
     desc: "¡Hola a todos! Acabo de probar una receta de pan integral con semillas que no me disparó el azúcar. ¿Alguien más tiene trucos para desayunos lentos?",
     img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=800",
     likes: 24,
@@ -296,14 +296,14 @@ export function Comunidad() {
         {user ? (
           <button
             onClick={() => setIsEditorOpen(true)}
-            className="w-full md:w-auto bg-[#246b38] hover:bg-[#1a4d2e] text-white px-8 py-5 rounded-[2rem] font-bold flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#246b38]/20"
+            className="w-full md:w-auto bg-[#477d1e] hover:bg-[#477d1e] text-white px-8 py-5 rounded-[2rem] font-bold flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#477d1e]/20"
           >
             <Plus className="w-6 h-6" /> Nueva publicación
           </button>
         ) : (
           <button
             onClick={() => navigate('/login')}
-            className="w-full md:w-auto bg-[#e0efd5] hover:bg-[#cce3d1] text-[#246b38] px-8 py-5 rounded-[2rem] font-bold flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#246b38]/20"
+            className="w-full md:w-auto bg-[#8aaa1f] hover:bg-[#8aaa1f] text-[#477d1e] px-8 py-5 rounded-[2rem] font-bold flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#477d1e]/20"
           >
             <LogIn className="w-6 h-6" /> Inicia sesión para publicar
           </button>
@@ -317,7 +317,7 @@ export function Comunidad() {
             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Temas Destacados</h3>
             <ul className="space-y-2">
               <li>
-                <button className="w-full text-left bg-[#cce3d1] text-[#246b38] px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3">
+                <button className="w-full text-left bg-[#8aaa1f] text-[#477d1e] px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3">
                   <Activity className="w-4 h-4" /> Diabetes
                 </button>
               </li>
@@ -356,7 +356,7 @@ export function Comunidad() {
         <div className="flex-1 space-y-6">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
-              <Loader2 className="w-10 h-10 text-[#246b38] animate-spin" />
+              <Loader2 className="w-10 h-10 text-[#477d1e] animate-spin" />
               <p className="text-gray-500 font-medium animate-pulse">Cargando comunidad...</p>
             </div>
           ) : posts.length === 0 ? (
@@ -376,7 +376,7 @@ export function Comunidad() {
                     <p className="text-xs text-gray-400">
                       {post.time} • <span className={cn(
                         "font-semibold",
-                        post.tag === 'Diabetes' ? 'text-[#2a5934]' : post.tag === 'Obesidad' ? 'text-rose-600' : 'text-[#246b38]'
+                        post.tag === 'Diabetes' ? 'text-[#2a5934]' : post.tag === 'Obesidad' ? 'text-rose-600' : 'text-[#477d1e]'
                       )}>{post.tag}</span>
                     </p>
                   </div>

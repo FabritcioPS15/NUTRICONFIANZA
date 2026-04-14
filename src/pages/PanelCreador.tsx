@@ -213,7 +213,7 @@ export function PanelCreador() {
   if (!authChecked) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center p-8">
-        <Loader2 className="w-10 h-10 text-[#246b38] animate-spin" />
+        <Loader2 className="w-10 h-10 text-[#477d1e] animate-spin" />
       </div>
     );
   }
@@ -222,15 +222,15 @@ export function PanelCreador() {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center p-8 animate-fade-in-up">
         <div className="w-full max-w-md bg-white rounded-[3rem] border border-gray-100 shadow-2xl p-12 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#e0efd5]/50 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#246b38]/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#8aaa1f]/50 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#477d1e]/5 rounded-full translate-y-1/2 -translate-x-1/2" />
           
           <div className="relative">
-            <div className="w-20 h-20 bg-[#e0efd5] rounded-[2rem] flex items-center justify-center mb-8 mx-auto">
-               <Lock className="w-10 h-10 text-[#246b38]" />
+            <div className="w-20 h-20 bg-[#8aaa1f] rounded-[2rem] flex items-center justify-center mb-8 mx-auto">
+               <Lock className="w-10 h-10 text-[#477d1e]" />
             </div>
             
-            <h1 className="text-3xl font-black text-[#1a1a1a] text-center mb-4 tracking-tighter">Acceso Reservado</h1>
+            <h1 className="text-3xl font-black text-[#1a1a1a] mb-4 tracking-tighter">Acceso Reservado</h1>
             <p className="text-gray-500 text-center mb-10 text-sm font-medium">Ingresa tus credenciales para gestionar el contenido de Nutriconfianza.</p>
             
             <form onSubmit={handleLogin} className="space-y-6">
@@ -243,7 +243,7 @@ export function PanelCreador() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="admin@nutriconfianza.com"
-                    className="w-full bg-gray-50 border-none rounded-2xl p-5 pl-12 focus:ring-2 focus:ring-[#246b38]/20 transition-all font-bold"
+                    className="w-full bg-gray-50 border-none rounded-2xl p-5 pl-12 focus:ring-2 focus:ring-[#477d1e]/20 transition-all font-bold"
                   />
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 </div>
@@ -258,7 +258,7 @@ export function PanelCreador() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="••••••••"
-                    className="w-full bg-gray-50 border-none rounded-2xl p-5 pl-12 focus:ring-2 focus:ring-[#246b38]/20 transition-all font-bold"
+                    className="w-full bg-gray-50 border-none rounded-2xl p-5 pl-12 focus:ring-2 focus:ring-[#477d1e]/20 transition-all font-bold"
                   />
                   <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 </div>
@@ -268,8 +268,8 @@ export function PanelCreador() {
                 type="submit"
                 disabled={isLoggingIn}
                 className={cn(
-                  "w-full py-6 rounded-3xl font-bold transition-all shadow-xl shadow-[#246b38]/20 flex items-center justify-center gap-3",
-                  isLoggingIn ? "bg-gray-100 text-gray-400" : "bg-[#246b38] hover:bg-[#1a4d2e] text-white"
+                  "w-full py-6 rounded-3xl font-bold transition-all shadow-xl shadow-[#477d1e]/20 flex items-center justify-center gap-3",
+                  isLoggingIn ? "bg-gray-100 text-gray-400" : "bg-[#477d1e] hover:bg-[#477d1e] text-white"
                 )}
               >
                 {isLoggingIn ? <Loader2 className="w-5 h-5 animate-spin" /> : "Entrar al Panel"}
@@ -286,7 +286,7 @@ export function PanelCreador() {
       <div className="mb-12 flex justify-between items-end">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#246b38] bg-[#e0efd5] px-3 py-1 rounded-full">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#477d1e] bg-[#8aaa1f] px-3 py-1 rounded-full">
                Sesión Activa
             </span>
             <button 
@@ -316,10 +316,10 @@ export function PanelCreador() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2 space-y-8">
           <div className="bg-white border border-gray-100 rounded-[3rem] p-10 shadow-sm relative overflow-hidden">
-            {editId && <div className="absolute top-0 left-0 w-2 h-full bg-[#246b38]" />}
+            {editId && <div className="absolute top-0 left-0 w-2 h-full bg-[#477d1e]" />}
             <h2 className="flex items-center gap-3 text-2xl font-bold mb-10 text-[#1a1a1a]">
-              <div className="p-2 bg-[#e0efd5] rounded-xl">
-                 {editId ? <Edit2 className="w-6 h-6 text-[#246b38]" /> : <PlusCircle className="w-6 h-6 text-[#246b38]" />}
+              <div className="p-2 bg-[#8aaa1f] rounded-xl">
+                 {editId ? <Edit2 className="w-6 h-6 text-[#477d1e]" /> : <PlusCircle className="w-6 h-6 text-[#477d1e]" />}
               </div>
               {editId ? 'Modificar Publicación' : 'Nueva Publicación'}
             </h2>
@@ -334,7 +334,7 @@ export function PanelCreador() {
                       value={authorName}
                       onChange={(e) => setAuthorName(e.target.value)}
                       placeholder="Ej: Nut. Juan Pérez"
-                      className="w-full bg-[#f3f4f6]/50 border-none rounded-2xl p-5 pl-12 text-[#1a1a1a] font-medium placeholder:text-gray-300 focus:ring-2 focus:ring-[#2a5934]/20 transition-all font-bold"
+                      className="w-full bg-[#f3f4f6]/50 border-none rounded-2xl p-5 pl-12 text-[#1a1a1a] font-medium placeholder:text-gray-300 focus:ring-2 focus:ring-[#477d1e]/20 transition-all font-bold"
                     />
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   </div>
@@ -346,7 +346,7 @@ export function PanelCreador() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Ej: Guía Nutricional 2024"
-                    className="w-full bg-[#f3f4f6]/50 border-none rounded-2xl p-5 text-[#1a1a1a] font-medium placeholder:text-gray-300 focus:ring-2 focus:ring-[#2a5934]/20 transition-all"
+                    className="w-full bg-[#f3f4f6]/50 border-none rounded-2xl p-5 text-[#1a1a1a] font-medium placeholder:text-gray-300 focus:ring-2 focus:ring-[#477d1e]/20 transition-all"
                   />
                 </div>
               </div>
@@ -358,7 +358,7 @@ export function PanelCreador() {
                     <select 
                       value={selectedCategory}
                       onChange={(e) => setSelectedCategory(e.target.value)}
-                      className="w-full appearance-none bg-[#f3f4f6]/50 border-none rounded-2xl p-5 text-[#1a1a1a] font-medium focus:ring-2 focus:ring-[#2a5934]/20 transition-all cursor-pointer"
+                      className="w-full appearance-none bg-[#f3f4f6]/50 border-none rounded-2xl p-5 text-[#1a1a1a] font-medium focus:ring-2 focus:ring-[#477d1e]/20 transition-all cursor-pointer"
                     >
                       {categories.map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
@@ -376,7 +376,7 @@ export function PanelCreador() {
                       className={cn(
                         "flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all group",
                         contentType === 'video' 
-                          ? "bg-[#e0efd5] border-[#246b38] text-[#246b38]" 
+                          ? "bg-[#8aaa1f] border-[#477d1e] text-[#477d1e]" 
                           : "bg-gray-50 border-transparent text-gray-400 hover:bg-gray-100"
                       )}
                     >
@@ -388,7 +388,7 @@ export function PanelCreador() {
                        className={cn(
                         "flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all group",
                         contentType === 'flyer' 
-                          ? "bg-[#e0efd5] border-[#246b38] text-[#246b38]" 
+                          ? "bg-[#8aaa1f] border-[#477d1e] text-[#477d1e]" 
                           : "bg-gray-50 border-transparent text-gray-400 hover:bg-gray-100"
                       )}
                     >
@@ -405,13 +405,13 @@ export function PanelCreador() {
                   <div className="flex bg-gray-100 p-1 rounded-xl">
                     <button 
                       onClick={() => setUploadType('file')}
-                      className={cn("px-4 py-1.5 rounded-lg text-xs font-bold transition-all", uploadType === 'file' ? "bg-white text-[#246b38] shadow-sm" : "text-gray-400")}
+                      className={cn("px-4 py-1.5 rounded-lg text-xs font-bold transition-all", uploadType === 'file' ? "bg-white text-[#477d1e] shadow-sm" : "text-gray-400")}
                     >
                       Archivo
                     </button>
                     <button 
                       onClick={() => setUploadType('link')}
-                      className={cn("px-4 py-1.5 rounded-lg text-xs font-bold transition-all", uploadType === 'link' ? "bg-white text-[#246b38] shadow-sm" : "text-gray-400")}
+                      className={cn("px-4 py-1.5 rounded-lg text-xs font-bold transition-all", uploadType === 'link' ? "bg-white text-[#477d1e] shadow-sm" : "text-gray-400")}
                     >
                       Link Social
                     </button>
@@ -431,12 +431,12 @@ export function PanelCreador() {
                       onClick={() => fileInputRef.current?.click()}
                       className={cn(
                         "border-2 border-dashed rounded-[2.5rem] p-16 flex flex-col items-center justify-center text-center cursor-pointer transition-colors group",
-                        uploadedUrl ? "border-green-500 bg-green-50/10" : "border-[#e0efd5] hover:bg-gray-50/50"
+                        uploadedUrl ? "border-green-500 bg-green-50/10" : "border-[#8aaa1f] hover:bg-gray-50/50"
                       )}
                     >
                        <div className={cn(
                          "w-16 h-16 rounded-3xl flex items-center justify-center mb-6 transition-transform",
-                         uploadedUrl ? "bg-green-100 text-green-600" : "bg-[#e0efd5] text-[#246b38] group-hover:scale-110"
+                         uploadedUrl ? "bg-green-100 text-green-600" : "bg-[#8aaa1f] text-[#477d1e] group-hover:scale-110"
                        )}>
                           {isUploading ? <Loader2 className="w-8 h-8 animate-spin" /> : uploadedUrl ? <CheckCircle2 className="w-8 h-8" /> : <FileCheck className="w-8 h-8" />}
                        </div>
@@ -453,10 +453,10 @@ export function PanelCreador() {
                       value={linkUrl}
                       onChange={(e) => setLinkUrl(e.target.value)}
                       placeholder="Pega el link de YouTube, TikTok, Twitter o TikTok aquí..."
-                      className="w-full bg-[#f3f4f6] border-2 border-[#e0efd5] rounded-2xl p-8 text-sm focus:ring-2 focus:ring-[#2a5934]/20 transition-all outline-none"
+                      className="w-full bg-[#f3f4f6] border-2 border-[#8aaa1f] rounded-2xl p-8 text-sm focus:ring-2 focus:ring-[#2a5934]/20 transition-all outline-none"
                     />
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-[#e0efd5] rounded-xl">
-                      <LinkIcon className="w-5 h-5 text-[#246b38]" />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-[#8aaa1f] rounded-xl">
+                      <LinkIcon className="w-5 h-5 text-[#477d1e]" />
                     </div>
                   </div>
                 )}
@@ -469,7 +469,7 @@ export function PanelCreador() {
                   "w-full py-6 rounded-[2rem] font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-xl mt-4",
                   isUploading || (uploadType === 'file' ? !uploadedUrl : !linkUrl) || !title || !authorName
                     ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-[#2a5934] hover:bg-[#1a4d2e] text-white hover:scale-[1.02] active:scale-[0.98] shadow-[#2a5934]/20"
+                    : "bg-[#2a5934] hover:bg-[#477d1e] text-white hover:scale-[1.02] active:scale-[0.98] shadow-[#2a5934]/20"
                 )}
               >
                 {isUploading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Send className="w-5 h-5" />}
@@ -498,11 +498,11 @@ export function PanelCreador() {
                     }}
                     className={cn(
                       "flex gap-4 items-center group cursor-pointer p-4 rounded-[2rem] border transition-all",
-                      editId === post.id ? "bg-[#e0efd5] border-[#246b38]" : "bg-gray-50 border-transparent hover:border-[#e0efd5]"
+                      editId === post.id ? "bg-[#8aaa1f] border-[#477d1e]" : "bg-gray-50 border-transparent hover:border-[#8aaa1f]"
                     )}
                   >
                     <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-sm flex-shrink-0 bg-white flex items-center justify-center">
-                      {post.content_type === 'video' ? <VideoIcon className="w-5 h-5 text-[#246b38]" /> : <FileText className="w-5 h-5 text-[#246b38]" />}
+                      {post.content_type === 'video' ? <VideoIcon className="w-5 h-5 text-[#477d1e]" /> : <FileText className="w-5 h-5 text-[#477d1e]" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-bold text-sm text-[#1a1a1a] truncate mb-0.5">{post.title}</h4>
@@ -511,7 +511,7 @@ export function PanelCreador() {
                          <span className="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest bg-white/50 text-gray-600">
                            {post.category}
                          </span>
-                         <Edit2 className="w-3 h-3 text-gray-300 group-hover:text-[#246b38] ml-auto transition-colors" />
+                         <Edit2 className="w-3 h-3 text-gray-300 group-hover:text-[#477d1e] ml-auto transition-colors" />
                          <Trash2 
                            className="w-3 h-3 text-gray-300 group-hover:text-red-500 transition-colors"
                            onClick={(e) => deletePost(post.id, e)}

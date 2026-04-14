@@ -72,7 +72,7 @@ export function Editor({ onClose, onPost }: EditorProps) {
       user: userName,
       time: "Ahora mismo",
       tag: selectedTag,
-      avatar: "bg-[#cce3d1]",
+      avatar: "bg-[#8aaa1f]",
       desc: text,
       img: uploadedUrl || undefined,
       mediaType: fileType || undefined,
@@ -103,8 +103,8 @@ export function Editor({ onClose, onPost }: EditorProps) {
         {/* Content */}
         <div className="p-5 sm:p-8 space-y-5 sm:space-y-6 overflow-y-auto flex-1">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-10 sm:h-10 rounded-full bg-[#cce3d1] flex items-center justify-center flex-shrink-0">
-              <span className="text-[#246b38] font-bold text-xs">
+            <div className="w-10 h-10 sm:w-10 sm:h-10 rounded-full bg-[#8aaa1f] flex items-center justify-center flex-shrink-0">
+              <span className="text-[#477d1e] font-bold text-xs">
                 {(user?.full_name || user?.email?.split('@')[0] || 'U').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
               </span>
             </div>
@@ -117,7 +117,7 @@ export function Editor({ onClose, onPost }: EditorProps) {
                     onClick={() => setSelectedTag(tag)}
                     className={cn(
                       "text-[9px] sm:text-[10px] font-bold px-2 sm:px-2 py-0.5 rounded-full uppercase tracking-wider transition-colors",
-                      selectedTag === tag ? "bg-[#246b38] text-white" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                      selectedTag === tag ? "bg-[#477d1e] text-white" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
                     )}
                    >
                      {tag}
@@ -139,7 +139,7 @@ export function Editor({ onClose, onPost }: EditorProps) {
             <div className="relative rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 min-h-[180px] sm:min-h-[200px] flex items-center justify-center">
               {isUploading ? (
                 <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-8 h-8 text-[#246b38] animate-spin" />
+                  <Loader2 className="w-8 h-8 text-[#477d1e] animate-spin" />
                   <p className="text-sm text-gray-500 font-medium">Subiendo archivo...</p>
                 </div>
               ) : uploadedUrl && (
@@ -184,7 +184,7 @@ export function Editor({ onClose, onPost }: EditorProps) {
             <button 
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              className="text-gray-400 hover:text-[#246b38] transition-colors p-3 sm:p-2 hover:bg-gray-50 rounded-xl sm:rounded-lg disabled:opacity-50"
+              className="text-gray-400 hover:text-[#477d1e] transition-colors p-3 sm:p-2 hover:bg-gray-50 rounded-xl sm:rounded-lg disabled:opacity-50"
             >
               <ImageIcon className="w-5 h-5 sm:w-5 sm:h-5" />
             </button>
@@ -201,11 +201,11 @@ export function Editor({ onClose, onPost }: EditorProps) {
                   }
                 }
               }}
-              className="text-gray-400 hover:text-[#246b38] transition-colors p-3 sm:p-2 hover:bg-gray-50 rounded-xl sm:rounded-lg"
+              className="text-gray-400 hover:text-[#477d1e] transition-colors p-3 sm:p-2 hover:bg-gray-50 rounded-xl sm:rounded-lg"
             >
               <Paperclip className="w-5 h-5 sm:w-5 sm:h-5" />
             </button>
-            <button className="text-gray-400 hover:text-[#246b38] transition-colors p-3 sm:p-2 hover:bg-gray-50 rounded-xl sm:rounded-lg">
+            <button className="text-gray-400 hover:text-[#477d1e] transition-colors p-3 sm:p-2 hover:bg-gray-50 rounded-xl sm:rounded-lg">
               <Smile className="w-5 h-5 sm:w-5 sm:h-5" />
             </button>
             
@@ -215,7 +215,7 @@ export function Editor({ onClose, onPost }: EditorProps) {
               className={cn(
                 "ml-auto flex items-center gap-2 px-5 sm:px-6 py-3 sm:py-2.5 rounded-full font-bold text-sm transition-all",
                 (text.trim() || uploadedUrl) && !isUploading
-                  ? "bg-[#246b38] text-white shadow-lg shadow-green-900/20 hover:scale-105 active:scale-95" 
+                  ? "bg-[#477d1e] text-white shadow-lg shadow-green-900/20 hover:scale-105 active:scale-95" 
                   : "bg-gray-100 text-gray-400 cursor-not-allowed"
               )}
             >
