@@ -5,8 +5,11 @@ import {
   FileText, 
   User, 
   Calendar,
-  Tag,
-  Loader2
+  List,
+  Info,
+  ExternalLink,
+  Loader2,
+  Download
 } from 'lucide-react';
 import { supabase } from '../lib/supabase/client';
 
@@ -32,6 +35,7 @@ export function ViewFlyer() {
       if (error) throw error;
       setFlyer(data);
     } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -39,97 +43,112 @@ export function ViewFlyer() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-[#8aaa1f] animate-spin" />
+      <div className="h-screen flex items-center justify-center bg-[#f8f9f5]">
+        <Loader2 className="w-10 h-10 text-[#477d1e] animate-spin" />
       </div>
     );
   }
 
   if (!flyer) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Flyer no encontrado</p>
+      <div className="h-screen flex items-center justify-center bg-[#f8f9f5]">
+        <div className="text-center space-y-4">
+          <p className="text-gray-500 font-bold text-xl">Flyer no encontrado</p>
+          <button 
+            onClick={() => navigate('/flyers')}
+            className="px-6 py-3 bg-[#477d1e] text-white rounded-2xl font-bold"
+          >
+            Volver a Flyers
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#8aaa1f]">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <button 
-            onClick={() => navigate('/creador')}
-            className="flex items-center gap-2 text-gray-400 hover:text-[#8aaa1f] transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" /> Volver al Panel
-          </button>
+    <div className="h-screen bg-[#f8faf7] flex flex-col overflow-hidden">
+      {/* Header sutil e integrado */}
+      <header className="px-8 py-6 flex items-center justify-between flex-shrink-0">
+        <button 
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-500 hover:text-[#477d1e] transition-all font-bold group"
+        >
+          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> 
+          Volver al Panel
+        </button>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-[#477d1e] animate-pulse" />
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">Nutriconfianza DOCS</span>
         </div>
-      </div>
+      </header>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Flyer Image */}
-          <div className="lg:col-span-2">
-            <div className="bg-white border border-gray-100 rounded-[3rem] p-8 shadow-sm">
-              <div className="bg-gray-100 rounded-2xl overflow-hidden mb-6">
-                <img src={flyer.media_url} alt={flyer.title} className="w-full h-auto" />
-              </div>
-
-              <h1 className="text-3xl font-black text-[#1a1a1a] mb-4">{flyer.title}</h1>
-              
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4" />
-                  <span>{flyer.author_name}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>{new Date(flyer.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                </div>
-              </div>
-            </div>
+      {/* Main Content Area - Distribuido para NO hacer scroll */}
+      <main className="flex-1 px-8 pb-8 flex flex-col gap-6 overflow-hidden max-w-5xl mx-auto w-full">
+        
+        {/* Flyer Preview Section */}
+        <section className="flex-1 min-h-0 bg-white rounded-[2.5rem] shadow-2xl shadow-green-900/5 p-4 flex flex-col border border-white">
+          <div className="flex-1 rounded-[2rem] overflow-hidden bg-gray-50 relative group flex items-center justify-center">
+            <img 
+              src={flyer.media_url} 
+              alt={flyer.title} 
+              className="max-w-full max-h-full object-contain transition-transform duration-700 group-hover:scale-[1.02]" 
+            />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors pointer-events-none" />
           </div>
-
-          {/* Info Sidebar */}
-          <div className="space-y-6">
-            <div className="bg-white border border-gray-100 rounded-[3rem] p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-[#8aaa1f] rounded-2xl flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-                <h2 className="text-xl font-bold text-[#1a1a1a]">Información</h2>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">Categoría</p>
-                  <div className="flex items-center gap-2">
-                    <Tag className="w-4 h-4 text-[#8aaa1f]" />
-                    <span className="font-medium text-[#1a1a1a]">{flyer.category}</span>
+          
+          {/* Metadata Compacta */}
+          <div className="pt-4 px-2 flex items-end justify-between gap-4">
+             <div className="flex-1 min-w-0">
+                <h1 className="text-2xl md:text-3xl font-black text-[#1a1a1a] tracking-tight truncate">{flyer.title}</h1>
+                <div className="flex items-center gap-4 mt-1 text-gray-400 font-bold text-[10px] uppercase tracking-widest">
+                  <div className="flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-[#477d1e]" />
+                    <span>{flyer.author_name}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-[#477d1e]" />
+                    <span>{new Date(flyer.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}</span>
                   </div>
                 </div>
+             </div>
+             <div className="flex-shrink-0">
+               <span className="font-black text-[#477d1e] bg-[#477d1e]/5 px-4 py-2 rounded-xl text-xs uppercase tracking-widest border border-[#477d1e]/10">
+                 {flyer.category}
+               </span>
+             </div>
+          </div>
+        </section>
 
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">Tipo</p>
-                  <span className="font-medium text-[#1a1a1a]">Flyer</span>
-                </div>
+        {/* Action Grid Compacta */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-shrink-0">
+          {/* Info Card */}
+          <div className="bg-white/50 backdrop-blur-md rounded-[2rem] p-5 flex items-center justify-between border border-white">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-[#477d1e]/10 rounded-xl flex items-center justify-center">
+                <Info className="w-5 h-5 text-[#477d1e]" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Tipo de Documento</p>
+                <p className="text-sm font-bold text-[#1a1a1a]">Flyer Informativo HD</p>
               </div>
             </div>
-
-            <div className="bg-white border border-gray-100 rounded-[3rem] p-6 shadow-sm">
-              <h3 className="text-lg font-bold mb-4 text-[#1a1a1a]">Acciones</h3>
-              <button 
-                onClick={() => window.open(flyer.media_url, '_blank')}
-                className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 bg-[#8aaa1f] hover:bg-[#8aaa1f] text-white transition-colors"
-              >
-                <FileText className="w-5 h-5" /> Abrir en Nueva Ventana
-              </button>
+            <div className="p-3 bg-blue-50 rounded-xl">
+               <FileText className="w-5 h-5 text-blue-600" />
             </div>
           </div>
-        </div>
-      </div>
+
+          {/* Action Button */}
+          <button 
+            onClick={() => window.open(flyer.media_url, '_blank')}
+            className="group relative overflow-hidden py-5 rounded-[2rem] bg-[#477d1e] text-white font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#477d1e]/20"
+          >
+            <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+            <Download className="w-5 h-5 relative z-10" />
+            <span className="relative z-10">Ver o Descargar Flyer</span>
+          </button>
+        </section>
+
+      </main>
     </div>
   );
 }

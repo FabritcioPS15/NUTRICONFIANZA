@@ -1,4 +1,4 @@
-import { Play, Loader2, X, Bookmark, ChevronDown } from 'lucide-react';
+import { Play, Loader2, X, Bookmark, ChevronDown, Activity, Heart, Apple, Dumbbell, LayoutGrid, Info } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -8,16 +8,12 @@ import { useAuth } from '../hooks/useAuth';
 import { useFavorites } from '../hooks/useFavorites';
 import { useWatched } from '../hooks/useWatched';
 
-const INITIAL_VIDEOS: Video[] = [
-  {
-    id: 'v1',
-    title: 'Índice Glucémico: Qué es y cómo afecta tu energía',
-    category: 'Diabetes',
-    desc: 'Descubre por qué no todos los carbohidratos son iguales para tu metabolismo.',
-    img: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&q=80&w=1200',
-    likes: 2400,
-    liked: false
-  }
+const CATEGORIES = [
+  { id: 'Todos', name: 'TODOS', icon: LayoutGrid },
+  { id: 'Diabetes', name: 'DIABETES', icon: Activity },
+  { id: 'Hipertensión', name: 'HIPERTENSIÓN', icon: Heart },
+  { id: 'Obesidad', name: 'OBESIDAD', icon: Dumbbell },
+  { id: 'General', name: 'GENERAL', icon: Apple }
 ];
 
 export function Videos() {
@@ -25,27 +21,14 @@ export function Videos() {
   const { user } = useAuth();
   const { favorites, addFavorite, removeFavorite } = useFavorites(user?.id || null);
   const { markAsWatched } = useWatched(user?.id || null);
-  const categories = ['Todos', 'Diabetes', 'Hipertensión', 'Obesidad', 'General'];
+  
   const [selectedCategory, setSelectedCategory] = useState('Todos');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [videosList, setVideosList] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
-  const [playingVideo, setPlayingVideo] = useState<Video | null>(null);
 
   useEffect(() => {
     fetchVideos();
   }, [selectedCategory]);
-
-  useEffect(() => {
-    if (playingVideo && user?.id) {
-      markAsWatched(String(playingVideo.id), 'video');
-    }
-  }, [playingVideo, user?.id, markAsWatched]);
-
-  const handleViewVideo = (video: Video) => {
-    markAsWatched(String(video.id), 'video');
-    navigate(`/view-video/${video.id}`);
-  };
 
   const fetchVideos = async () => {
     try {
@@ -64,7 +47,7 @@ export function Videos() {
 
       if (error) throw error;
 
-      if (data && data.length > 0) {
+      if (data) {
         const mapped: Video[] = data.map(v => ({
           id: v.id,
           title: v.title || "",
@@ -76,10 +59,9 @@ export function Videos() {
           liked: false
         }));
         setVideosList(mapped);
-      } else {
-        setVideosList(INITIAL_VIDEOS.filter(v => selectedCategory === 'Todos' || v.category === selectedCategory));
       }
     } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -98,203 +80,149 @@ export function Videos() {
     return favorites.some(f => f.content_id === id);
   };
 
-  const getEmbedUrl = (url: string) => {
-    if (url.includes('youtube.com/watch?v=')) {
-      return url.replace('watch?v=', 'embed/');
-    }
-    if (url.includes('youtu.be/')) {
-      return url.replace('youtu.be/', 'youtube.com/embed/');
-    }
-    return url;
+  const handleViewVideo = (video: Video) => {
+    markAsWatched(String(video.id), 'video');
+    navigate(`/view-video/${video.id}`);
   };
 
-  const isIframeable = (url: string) => {
-    return url.includes('youtube.com') || url.includes('youtu.be');
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loader2 className="w-10 h-10 text-[#477d1e] animate-spin" />
+      </div>
+    );
+  }
+
+  const featuredVideo = videosList[0];
+  const nextVideos = videosList.slice(1, 4);
+  const remainingVideos = videosList.slice(4);
 
   return (
-    <div className="py-8 animate-fade-in-up">
-      <div className="flex flex-col lg:flex-row gap-12">
-        {/* Sidebar - Integrated Filters for Desktop */}
-        <div className="w-full lg:w-[320px] flex-shrink-0 space-y-12">
-          <div>
-            <h1 className="text-3xl md:text-5xl font-black text-[#477d1e] leading-tight mb-6 tracking-tighter">
-              Curaduría de Bienestar
-            </h1>
-            <p className="text-gray-500 font-medium leading-relaxed mb-10">
-              Aprende con cápsulas educativas diseñadas por expertos. Una experiencia visual sin distracciones para tu salud.
-            </p>
-            
-            {/* Desktop Navigation List (Sidebar) */}
-            <div className="hidden lg:flex flex-col gap-3">
-               <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">Filtrar Contenido</h3>
-               {categories.map((cat) => {
-                 const isActive = selectedCategory === cat;
-                 return (
+    <div className="bg-white min-h-screen animate-fade-in flex flex-col lg:flex-row gap-8 pb-20">
+      
+      {/* Sidebar de Filtros Vertical */}
+      <aside className="lg:w-24 lg:sticky lg:top-24 h-fit flex flex-col items-center gap-6 py-8 px-4 bg-gray-50/50 rounded-3xl border border-gray-100 flex-shrink-0">
+        <div className="w-10 h-10 rounded-full bg-[#477d1e]/10 flex items-center justify-center text-[#477d1e] mb-4">
+           <Search className="w-5 h-5" />
+        </div>
+        
+        {CATEGORIES.map((cat) => {
+          const isActive = selectedCategory === cat.id;
+          return (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={cn(
+                "group flex flex-col items-center gap-2 transition-all",
+                isActive ? "text-[#477d1e]" : "text-gray-300 hover:text-[#477d1e]"
+              )}
+            >
+              <div className={cn(
+                "w-12 h-12 rounded-2xl flex items-center justify-center transition-all border-2",
+                isActive ? "bg-[#477d1e] border-[#477d1e] text-white shadow-lg shadow-[#477d1e]/20" : "bg-white border-transparent"
+              )}>
+                <cat.icon className="w-5 h-5" />
+              </div>
+              <span className="text-[8px] font-black uppercase tracking-widest">{cat.name}</span>
+            </button>
+          );
+        })}
+
+        {/* Destacado Hoy Box */}
+        <div className="mt-20 hidden lg:block">
+           <div className="w-48 -rotate-90 origin-bottom-left translate-x-12 translate-y-24">
+              <div className="bg-[#477d1e]/5 p-6 rounded-[2rem] border-l-4 border-[#477d1e]">
+                <p className="text-[10px] font-black uppercase text-[#477d1e] mb-1">Destacado hoy</p>
+                <p className="text-[8px] font-bold text-gray-400 line-clamp-2">Nuevas estrategias de control metabólico avanzado.</p>
+              </div>
+           </div>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 space-y-12">
+        
+        {/* Top Section: Featured + Next Videos */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+           
+           {/* Big Featured Video */}
+           {featuredVideo && (
+             <div className="lg:col-span-2 relative aspect-video rounded-[3rem] overflow-hidden group cursor-pointer shadow-2xl shadow-green-900/10" onClick={() => handleViewVideo(featuredVideo)}>
+                <img src={featuredVideo.img} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={featuredVideo.title} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                
+                <div className="absolute inset-0 flex items-center justify-center">
+                   <div className="w-20 h-20 bg-white/90 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                      <Play className="w-8 h-8 fill-current text-[#1a1a1a] translate-x-0.5" />
+                   </div>
+                </div>
+
+                <div className="absolute bottom-10 left-10 text-white">
+                   <span className="px-4 py-1.5 bg-[#477d1e] rounded-xl text-[10px] font-black uppercase tracking-widest mb-4 inline-block">
+                      {featuredVideo.category}
+                   </span>
+                   <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">{featuredVideo.title}</h2>
+                </div>
+             </div>
+           )}
+
+           {/* Next Videos List */}
+           <div className="space-y-6">
+              <h3 className="text-xs font-black uppercase tracking-[0.3em] text-[#1a1a1a] flex items-center gap-2">
+                 <div className="w-2 h-2 rounded-full bg-[#477d1e]" />
+                 Siguientes Videos
+              </h3>
+              <div className="space-y-4">
+                 {nextVideos.map((v) => (
+                   <div key={v.id} className="flex items-center gap-4 group cursor-pointer" onClick={() => handleViewVideo(v)}>
+                      <div className="w-32 aspect-video rounded-2xl overflow-hidden relative flex-shrink-0">
+                         <img src={v.img} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={v.title} />
+                         <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                            <Play className="w-4 h-4 text-white fill-current" />
+                         </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                         <h4 className="text-sm font-black text-[#1a1a1a] leading-tight line-clamp-2 group-hover:text-[#477d1e] transition-colors">{v.title}</h4>
+                         <p className="text-[10px] text-gray-400 font-bold uppercase mt-1 tracking-widest">{v.category}</p>
+                      </div>
+                   </div>
+                 ))}
+                 {nextVideos.length === 0 && <p className="text-gray-400 text-xs font-bold">No hay videos sugeridos.</p>}
+              </div>
+           </div>
+        </section>
+
+        {/* Remaining Videos Grid */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+           {remainingVideos.map((video) => (
+             <div key={video.id} className="bg-white rounded-[2.5rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] overflow-hidden group flex flex-col">
+                <div className="relative aspect-video overflow-hidden cursor-pointer" onClick={() => handleViewVideo(video)}>
+                   <img src={video.img} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={video.title} />
+                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                   
                    <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
+                    onClick={(e) => { e.stopPropagation(); toggleSave(String(video.id)); }}
                     className={cn(
-                      "group flex flex-col p-5 rounded-[2rem] transition-all border-2 text-left relative overflow-hidden",
-                      isActive 
-                        ? "bg-[#477d1e] border-[#477d1e] text-white shadow-xl shadow-[#477d1e]/20" 
-                        : "bg-white border-gray-50 text-gray-400 hover:border-[#477d1e]/20 hover:text-[#477d1e]"
+                      "absolute top-5 right-5 w-10 h-10 rounded-xl flex items-center justify-center backdrop-blur-md transition-all shadow-lg",
+                      isFavorite(String(video.id)) ? "bg-[#477d1e] text-white" : "bg-white/90 text-gray-400 hover:text-[#477d1e]"
                     )}
                    >
-                     <div className="flex items-center justify-between z-10">
-                       <span className="font-black text-sm uppercase tracking-widest">{cat}</span>
-                       <div className={cn("w-1.5 h-1.5 rounded-full transition-all", isActive ? "bg-white scale-150" : "bg-gray-200 group-hover:bg-[#477d1e]")} />
-                     </div>
-                     {isActive && <div className="absolute top-0 left-0 w-1.5 h-full bg-white opacity-50" />}
+                    <Bookmark className={cn("w-5 h-5", isFavorite(String(video.id)) ? "fill-current" : "")} />
                    </button>
-                 );
-               })}
-            </div>
-          </div>
-
-          <div className="space-y-6">
-             <div className="bg-[#f2f4f1] p-8 rounded-[2.5rem] border-l-4 border-[#477d1e] shadow-sm">
-                <span className="text-[10px] font-black text-[#477d1e] uppercase tracking-widest block mb-1">Destacado hoy</span>
-                <p className="text-xs font-bold text-gray-400 leading-relaxed">Control glucémico: Mitos y realidades en la alimentación diaria.</p>
-             </div>
-             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm opacity-60">
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Próximamente</span>
-                <p className="text-xs font-bold text-gray-400 leading-relaxed">Webinar en vivo: Nutrición para la salud cardiovascular el 15 de Octubre.</p>
-             </div>
-          </div>
-        </div>
-
-        {/* Dynamic Content Feed */}
-        <div className="flex-1 space-y-10">
-          {/* Mobile Category Dropdown Filter */}
-          <div className="lg:hidden relative mb-10 z-50">
-            <div className="flex items-center gap-4">
-              <div className="relative group w-full">
-                <button 
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-3 bg-white border-2 border-gray-100 px-8 py-5 rounded-[2rem] font-black text-sm text-[#1a1a1a] shadow-sm hover:border-[#477d1e]/30 transition-all active:scale-95 w-full justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                     <div className="w-2.5 h-2.5 rounded-full bg-[#477d1e]" />
-                     Explorar: {selectedCategory}
-                  </div>
-                  <ChevronDown className={cn("w-5 h-5 text-[#477d1e] transition-transform", isDropdownOpen && "rotate-180")} />
-                </button>
-                
-                {isDropdownOpen && (
-                  <>
-                    <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
-                    <div className="absolute top-full left-0 right-0 mt-3 bg-white/95 backdrop-blur-2xl border-2 border-gray-100 rounded-[2.5rem] overflow-hidden shadow-2xl z-20 p-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      {categories.map((cat) => (
-                        <button
-                          key={cat}
-                          onClick={() => {
-                            setSelectedCategory(cat);
-                            setIsDropdownOpen(false);
-                          }}
-                          className={cn(
-                            "w-full text-left px-8 py-5 rounded-2xl text-sm font-black transition-all flex items-center justify-between group/item",
-                            selectedCategory === cat 
-                              ? "bg-[#477d1e] text-white shadow-lg shadow-[#477d1e]/20" 
-                              : "text-gray-500 hover:bg-[#8aaa1f] hover:text-[#477d1e]"
-                          )}
-                        >
-                          {cat}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Video List */}
-          <div className="space-y-8">
-            {loading ? (
-              <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 text-[#477d1e] animate-spin" /></div>
-            ) : videosList.length === 0 ? (
-              <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-                <p className="text-gray-400 font-medium">Próximamente más videos.</p>
-              </div>
-            ) : (
-              videosList.map((video) => (
-                <div key={video.id} className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-sm group">
-                  <div
-                    className="relative aspect-[16/9] cursor-pointer overflow-hidden"
-                    onClick={() => handleViewVideo(video)}
-                  >
-                    <img 
-                      src={video.img} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                      alt={video.title} 
-                    />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                      <div className="w-20 h-20 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-xl">
-                        <Play className="w-8 h-8 fill-current text-[#1a1a1a]" />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="p-6 md:p-8">
-                    <div className="flex flex-col md:flex-row justify-between items-start mb-4 gap-4">
-                      <div>
-                        <span className="text-[9px] font-black uppercase tracking-widest text-[#477d1e] bg-[#8aaa1f] px-3 py-1 rounded-lg mb-3 inline-block">
-                          {video.category}
-                        </span>
-                        <h2 className="text-xl md:text-2xl font-black text-[#1a1a1a] mb-2 leading-tight">{video.title}</h2>
-                        <p className="text-gray-500 text-sm font-medium">{video.desc}</p>
-                      </div>
-                      <div className="flex gap-2">
-                         <button
-                           onClick={() => toggleSave(String(video.id))}
-                           className={cn(
-                             "p-4 rounded-2xl transition-all shadow-sm",
-                             isFavorite(String(video.id)) ? "bg-[#477d1e] text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
-                           )}
-                         >
-                           <Bookmark className={cn("w-5 h-5", isFavorite(String(video.id)) ? "fill-current" : "")} />
-                         </button>
-                      </div>
-                    </div>
-                  </div>
                 </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
 
-      {/* Video Player Modal */}
-      {playingVideo && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 animate-fade-in">
-          <div className="absolute inset-0 bg-black/95 backdrop-blur-sm" onClick={() => setPlayingVideo(null)} />
-          <button 
-            onClick={() => setPlayingVideo(null)}
-            className="absolute top-6 right-6 text-white hover:rotate-90 transition-transform p-3 z-[110]"
-          >
-            <X className="w-10 h-10" />
-          </button>
-          
-          <div className="relative w-full max-w-6xl aspect-[16/9] bg-black rounded-3xl overflow-hidden shadow-2xl z-[101]">
-            {isIframeable(playingVideo.videoUrl || '') ? (
-              <iframe
-                src={getEmbedUrl(playingVideo.videoUrl || '')}
-                className="w-full h-full border-none"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            ) : (
-              <video 
-                src={playingVideo.videoUrl} 
-                controls 
-                autoPlay 
-                className="w-full h-full object-contain"
-              />
-            )}
-          </div>
-        </div>
-      )}
+                <div className="p-8">
+                   <span className="text-[10px] font-black uppercase text-[#477d1e] bg-[#477d1e]/5 px-3 py-1 rounded-lg tracking-widest mb-3 inline-block">
+                      {video.category}
+                   </span>
+                   <h3 className="text-xl font-black text-[#1a1a1a] leading-tight tracking-tight line-clamp-2">{video.title}</h3>
+                </div>
+             </div>
+           ))}
+        </section>
+
+      </main>
+
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Download, Bookmark, Eye, Loader2, X, ChevronDown, ArrowUp } from 'lucide-react';
+import { Bookmark, Loader2, Search, LayoutGrid, Activity, Heart, Apple, Dumbbell } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -8,16 +8,12 @@ import { useAuth } from '../hooks/useAuth';
 import { useFavorites } from '../hooks/useFavorites';
 import { useWatched } from '../hooks/useWatched';
 
-const INITIAL_FLYERS: Flyer[] = [
-  {
-    id: 'f1',
-    title: "Protocolo FODMAP Simplificado",
-    desc: "Una guía paso a paso para identificar sensibilidades alimentarias sin perder el placer de comer.",
-    tag: "SALUD DIGESTIVA",
-    img: "https://images.unsplash.com/photo-1543362906-acfc16c67564?auto=format&fit=crop&q=80&w=600",
-    featured: true,
-    saved: false
-  }
+const CATEGORIES = [
+  { id: 'Todos', name: 'TODOS', icon: LayoutGrid },
+  { id: 'Diabetes', name: 'DIABETES', icon: Activity },
+  { id: 'Hipertensión', name: 'HIPERTENSIÓN', icon: Heart },
+  { id: 'Obesidad', name: 'OBESIDAD', icon: Dumbbell },
+  { id: 'General', name: 'GENERAL', icon: Apple }
 ];
 
 export function Flyers() {
@@ -25,25 +21,14 @@ export function Flyers() {
   const { user } = useAuth();
   const { favorites, addFavorite, removeFavorite } = useFavorites(user?.id || null);
   const { markAsWatched } = useWatched(user?.id || null);
-  const filters = ['Todos los Temas', 'Diabetes', 'Hipertensión', 'Obesidad', 'General'];
-  const [selectedFilter, setSelectedFilter] = useState('Todos los Temas');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  
+  const [selectedCat, setSelectedCat] = useState('Todos');
   const [flyersList, setFlyersList] = useState<Flyer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewingFlyer, setViewingFlyer] = useState<Flyer | null>(null);
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 400);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     fetchFlyers();
-  }, [selectedFilter]);
+  }, [selectedCat]);
 
   const fetchFlyers = async () => {
     try {
@@ -54,30 +39,29 @@ export function Flyers() {
         .eq('content_type', 'flyer')
         .order('created_at', { ascending: false });
 
-      if (selectedFilter !== 'Todos los Temas') {
-        query = query.eq('category', selectedFilter);
+      if (selectedCat !== 'Todos') {
+        query = query.eq('category', selectedCat);
       }
 
       const { data, error } = await query;
 
       if (error) throw error;
 
-      if (data && data.length > 0) {
+      if (data) {
         const mapped: Flyer[] = data.map(f => ({
           id: f.id,
           title: f.title || "",
           desc: f.description || "",
-          tag: f.category?.toUpperCase() || "RECURSO",
+          tag: f.category || "General",
           img: f.media_url || "https://images.unsplash.com/photo-1543362906-acfc16c67564?auto=format&fit=crop&q=80&w=400",
           featured: false,
           saved: false,
           info: "PDF"
         }));
         setFlyersList(mapped);
-      } else {
-        setFlyersList(INITIAL_FLYERS.filter(f => selectedFilter === 'Todos los Temas' || f.tag?.includes(selectedFilter.toUpperCase())));
       }
     } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -101,227 +85,118 @@ export function Flyers() {
     navigate(`/view-flyer/${flyer.id}`);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loader2 className="w-10 h-10 text-[#477d1e] animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="py-8 animate-fade-in-up">
-      <div className="flex flex-col lg:flex-row gap-12 relative">
-        {/* Sidebar - Desktop Filters */}
-        <div className="w-full lg:w-[320px] flex-shrink-0 space-y-12 lg:sticky lg:top-24 h-fit">
-          <div>
-            <h1 className="text-4xl md:text-6xl font-black text-[#1a1a1a] leading-tight mb-6 tracking-tighter">
-               Conocimiento <br /><span className="text-[#3b8751] italic font-medium">Visual.</span>
-            </h1>
-            <p className="text-gray-500 font-medium leading-relaxed mb-10">
-               Descubre nuestra biblioteca de infografías diseñadas por expertos. Información veraz para llevar contigo siempre.
-            </p>
-
-            {/* Desktop Vertical Menu */}
-            <div className="hidden lg:flex flex-col gap-3">
-               <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">Temas de Interés</h3>
-               {filters.map((filter) => {
-                 const isActive = selectedFilter === filter;
-                 return (
-                   <button
-                    key={filter}
-                    onClick={() => setSelectedFilter(filter)}
-                    className={cn(
-                      "group flex flex-col p-5 rounded-[2rem] transition-all border-2 text-left relative overflow-hidden",
-                      isActive 
-                        ? "bg-[#477d1e] border-[#477d1e] text-white shadow-xl shadow-[#477d1e]/20" 
-                        : "bg-white border-gray-50 text-gray-400 hover:border-[#477d1e]/20 hover:text-[#477d1e]"
-                    )}
-                   >
-                     <div className="flex items-center justify-between z-10">
-                       <span className="font-black text-sm uppercase tracking-widest">{filter}</span>
-                       <div className={cn("w-1.5 h-1.5 rounded-full transition-all", isActive ? "bg-white scale-150" : "bg-gray-200 group-hover:bg-[#477d1e]")} />
-                     </div>
-                     {isActive && <div className="absolute top-0 left-0 w-1.5 h-full bg-white opacity-50" />}
-                   </button>
-                 );
-               })}
-            </div>
-          </div>
-
-          <div className="bg-[#f8f9fa] p-8 rounded-[3rem] border border-gray-100">
-             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-4">Recurso Premium</span>
-             <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
-                   <Download className="w-5 h-5 text-[#477d1e]" />
-                </div>
-                <p className="text-xs font-bold text-gray-600">Todos los PDF están verificados por clínicos.</p>
-             </div>
-          </div>
-        </div>
-
-        {/* Content Area */}
-        <div className="flex-1 space-y-10">
-          {/* Mobile Category Dropdown Filter */}
-          <div className="lg:hidden relative mb-10 z-50">
-            <div className="relative group w-full">
-              <button 
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-3 bg-white border-2 border-gray-100 px-8 py-5 rounded-[2rem] font-black text-sm text-[#1a1a1a] shadow-sm hover:border-[#477d1e]/30 transition-all active:scale-95 w-full justify-between"
+    <div className="bg-white min-h-screen pb-32 animate-fade-in overflow-x-hidden">
+      
+      {/* Instagram-style Category Filter */}
+      <div className="max-w-7xl mx-auto px-6 pt-12 pb-12 border-b border-gray-50 mb-12">
+        <div className="flex flex-wrap justify-center gap-6 md:gap-12">
+          {CATEGORIES.map((cat) => {
+            const isActive = selectedCat === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCat(cat.id)}
+                className={cn(
+                  "group flex flex-col items-center gap-3 transition-all",
+                  isActive ? "text-[#477d1e]" : "text-gray-400 hover:text-[#477d1e]"
+                )}
               >
-                <div className="flex items-center gap-2">
-                   <div className="w-2.5 h-2.5 rounded-full bg-[#3b8751]" />
-                   Filtrar: {selectedFilter}
-                </div>
-                <ChevronDown className={cn("w-5 h-5 text-[#3b8751] transition-transform", isDropdownOpen && "rotate-180")} />
-              </button>
-              
-              {isDropdownOpen && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
-                  <div className="absolute top-full left-0 right-0 mt-3 bg-white/95 backdrop-blur-3xl border-2 border-gray-100 rounded-[2.5rem] overflow-hidden shadow-2xl z-20 p-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                    {filters.map((filter) => (
-                      <button
-                        key={filter}
-                        onClick={() => {
-                          setSelectedFilter(filter);
-                          setIsDropdownOpen(false);
-                        }}
-                        className={cn(
-                          "w-full text-left px-8 py-5 rounded-2xl text-sm font-black transition-all flex items-center justify-between group/item",
-                          selectedFilter === filter 
-                            ? "bg-[#477d1e] text-white shadow-lg shadow-[#477d1e]/20" 
-                            : "text-gray-500 hover:bg-[#8aaa1f] hover:text-[#477d1e]"
-                        )}
-                      >
-                        {filter}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-12">
-            {loading ? (
-              <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 text-[#477d1e] animate-spin" /></div>
-            ) : flyersList.length === 0 ? (
-              <div className="text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
-                 <p className="text-gray-400 font-medium">Buscando más recursos...</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Regular Flyers Grid */}
-                {flyersList.map((flyer) => (
-                   <div key={flyer.id} className="bg-white rounded-[3rem] overflow-hidden border border-gray-100 shadow-sm flex flex-col group">
-                      <div className="h-64 bg-gray-100 relative overflow-hidden cursor-pointer" onClick={() => handleViewFlyer(flyer)}>
-                         <img src={flyer.img} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={flyer.title} />
-                         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                           <Eye className="w-8 h-8 text-white" />
-                         </div>
-                         <button
-                           onClick={(e) => { e.stopPropagation(); toggleSave(String(flyer.id)); }}
-                           className={cn(
-                             "absolute top-5 right-5 w-12 h-12 rounded-2xl flex items-center justify-center backdrop-blur-md transition-all shadow-lg",
-                             isFavorite(String(flyer.id)) ? "bg-[#477d1e] text-white" : "bg-white/80 text-gray-600 hover:bg-white"
-                           )}
-                         >
-                            <Bookmark className={cn("w-5 h-5", isFavorite(String(flyer.id)) ? "fill-current" : "")} />
-                         </button>
-                      </div>
-                      <div className="p-6 md:p-8 flex flex-col flex-1">
-                         <div className="mb-4">
-                           <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">{flyer.tag}</span>
-                           <h3 className="text-xl font-bold text-[#1a1a1a] mt-1">{flyer.title}</h3>
-                         </div>
-                         <button
-                           onClick={() => handleViewFlyer(flyer)}
-                           className="mt-auto w-full bg-[#477d1e] hover:bg-[#123820] text-white py-4 rounded-[1.5rem] font-bold text-sm flex justify-center items-center gap-2 transition-all hover:scale-[1.02]"
-                         >
-                           Ver Recurso
-                         </button>
-                      </div>
+                <div className={cn(
+                  "w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center transition-all border-2",
+                  isActive 
+                    ? "bg-white border-[#477d1e] p-1 scale-110 shadow-lg" 
+                    : "bg-gray-50 border-transparent hover:border-gray-200"
+                )}>
+                   <div className={cn(
+                     "w-full h-full rounded-full flex items-center justify-center",
+                     isActive ? "bg-[#477d1e] text-white" : "bg-white text-gray-400"
+                   )}>
+                      <cat.icon className="w-6 h-6 md:w-8 md:h-8" />
                    </div>
-                ))}
-              </div>
-            )}
-          </div>
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest">{cat.name}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Flyer Viewer Modal - Premium Version */}
-      {viewingFlyer && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 animate-fade-in group">
-          <div className="absolute inset-0 bg-black/98 backdrop-blur-xl" onClick={() => setViewingFlyer(null)} />
-          
-          <button 
-            onClick={() => setViewingFlyer(null)}
-            className="absolute top-8 right-8 text-white/50 hover:text-white hover:rotate-90 transition-all p-3 z-[110]"
-          >
-            <X className="w-12 h-12 stroke-[1.5]" />
-          </button>
-          
-          <div className="relative w-full max-w-7xl h-full flex flex-col lg:flex-row items-center gap-12 z-[101]">
-            {/* Image Section */}
-            <div className="flex-1 h-full flex items-center justify-center">
-              <img 
-                src={viewingFlyer.img} 
-                className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10" 
-                alt={viewingFlyer.title} 
-              />
-            </div>
+      {/* Main Header */}
+      <div className="text-center max-w-4xl mx-auto px-6 mb-16">
+        <h1 className="text-4xl md:text-6xl font-black text-[#1a1a1a] tracking-tighter mb-4">
+          Galería de Conocimiento
+        </h1>
+        <p className="text-gray-400 font-medium max-w-xl mx-auto leading-relaxed">
+          Explora nuestras guías visuales en un formato limpio y directo. <br className="hidden md:block" />
+          Haz clic para abrir el recurso completo.
+        </p>
+      </div>
 
-            {/* Info Section */}
-            <div className="w-full lg:w-[400px] flex flex-col text-left">
-               <span className="text-[10px] font-black tracking-[0.3em] text-[#3b8751] bg-[#3b8751]/10 px-4 py-2 rounded-xl w-max mb-6">
-                 {viewingFlyer.tag}
-               </span>
-               <h2 className="text-4xl font-bold text-white mb-6 leading-tight tracking-tight">
-                 {viewingFlyer.title}
-               </h2>
-               <p className="text-white/60 text-lg leading-relaxed mb-10 font-medium">
-                 {viewingFlyer.desc}
-               </p>
+      {/* Instagram-style Grid Gallery */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+        {flyersList.length === 0 ? (
+           <div className="w-full flex flex-col items-center py-40 bg-gray-50 rounded-[4rem] border-4 border-dashed border-gray-100 text-gray-300">
+              <Search className="w-16 h-16 mb-4" />
+              <p className="text-xl font-bold">Aún no hay infografías aquí.</p>
+           </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-8">
+            {flyersList.map((flyer) => (
+              <div 
+                key={flyer.id} 
+                className="relative aspect-square group cursor-pointer overflow-hidden rounded-3xl md:rounded-[3rem] bg-gray-50 border border-gray-100 shadow-sm"
+                onClick={() => handleViewFlyer(flyer)}
+              >
+                <img 
+                  src={flyer.img} 
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
+                  alt={flyer.title} 
+                />
+                
+                {/* Instagram-style hover overlay */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex flex-col items-center justify-center p-6 text-center">
+                   <div className="opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 flex flex-col items-center">
+                      <p className="text-white text-[10px] font-black uppercase tracking-[0.3em] mb-2">{flyer.tag}</p>
+                      <h3 className="text-white text-base md:text-xl font-black leading-tight line-clamp-3 px-4">
+                        {flyer.title}
+                      </h3>
+                      <div className="mt-6 w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/20">
+                         <Search className="w-6 h-6" />
+                      </div>
+                   </div>
+                </div>
 
-               <div className="space-y-6">
-                  <div className="flex items-center gap-4 p-6 bg-white/5 rounded-[2rem] border border-white/10">
-                    <div className="w-12 h-12 rounded-full bg-[#3b8751] flex items-center justify-center text-white font-bold">
-                       {viewingFlyer.info === 'PDF' ? 'P' : 'R'}
-                    </div>
-                    <div>
-                       <p className="text-white/40 text-[9px] font-black uppercase tracking-widest">Recurso Verificado</p>
-                       <p className="text-white font-bold text-sm">Contenido para Salud Clínica</p>
-                    </div>
-                  </div>
+                {/* Favorite Bookmark */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleSave(String(flyer.id)); }}
+                  className={cn(
+                    "absolute top-4 right-4 md:top-8 md:right-8 w-10 h-10 md:w-14 md:h-14 rounded-2xl flex items-center justify-center backdrop-blur-md transition-all shadow-lg z-20",
+                    isFavorite(String(flyer.id)) ? "bg-[#477d1e] text-white scale-110" : "bg-white/90 text-gray-400 hover:text-[#477d1e] opacity-0 group-hover:opacity-100"
+                  )}
+                >
+                  <Bookmark className={cn("w-5 h-5 md:w-6 md:h-6", isFavorite(String(flyer.id)) ? "fill-current" : "")} />
+                </button>
 
-                  <div className="flex gap-4">
-                    <button className="flex-1 bg-white text-[#1a1a1a] px-8 py-5 rounded-[2rem] font-bold text-sm flex items-center justify-center gap-3 hover:scale-[1.02] shadow-xl transition-all">
-                      <Download className="w-5 h-5" /> Descargar PDF
-                    </button>
-                    <button
-                      onClick={() => toggleSave(String(viewingFlyer.id))}
-                      className={cn(
-                        "p-5 rounded-[2rem] font-bold text-sm flex items-center transition-all border",
-                        isFavorite(String(viewingFlyer.id))
-                          ? "bg-[#477d1e] border-transparent text-white"
-                          : "bg-white/5 border-white/10 text-white hover:bg-white/10"
-                      )}
-                    >
-                      <Bookmark className={cn("w-6 h-6", isFavorite(String(viewingFlyer.id)) ? "fill-current" : "")} />
-                    </button>
-                  </div>
-               </div>
-
-               <p className="mt-12 text-white/30 text-[9px] font-black uppercase tracking-widest">
-                 Nutriconfianza Knowledge Hub &copy; 2024
-               </p>
-            </div>
+                {/* Mobile Label (always visible on small screens if you want, but sticking to clean style) */}
+                <div className="absolute bottom-4 left-4 right-4 md:hidden">
+                   <div className="bg-black/20 backdrop-blur-md p-3 rounded-2xl border border-white/10">
+                      <p className="text-white font-black text-[10px] line-clamp-1">{flyer.title}</p>
+                   </div>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      )}
-      {/* Back to Top */}
-      {showScrollTop && (
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-10 right-10 w-14 h-14 bg-[#477d1e]/90 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-90 transition-all z-[60] border-4 border-white/20 backdrop-blur-xl animate-in fade-in zoom-in slide-in-from-bottom-5 duration-500"
-          aria-label="Scroll to top"
-        >
-          <ArrowUp className="w-6 h-6 stroke-[3]" />
-        </button>
-      )}
+        )}
+      </div>
     </div>
   );
 }

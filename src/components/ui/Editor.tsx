@@ -65,7 +65,7 @@ export function Editor({ onClose, onPost }: EditorProps) {
   const handleSubmit = () => {
     if (!text.trim() && !uploadedUrl) return;
     
-    const userName = user?.full_name || user?.email?.split('@')[0] || 'Usuario';
+    const userName = user?.full_name || 'Usuario';
     
     const newPost: Post = {
       id: Date.now(),
@@ -105,11 +105,11 @@ export function Editor({ onClose, onPost }: EditorProps) {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 sm:w-10 sm:h-10 rounded-full bg-[#8aaa1f] flex items-center justify-center flex-shrink-0">
               <span className="text-[#477d1e] font-bold text-xs">
-                {(user?.full_name || user?.email?.split('@')[0] || 'U').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                {(user?.full_name || 'U').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-               <p className="text-sm font-bold text-[#1a1a1a] truncate">{user?.full_name || user?.email?.split('@')[0] || 'Usuario'}</p>
+               <p className="text-sm font-bold text-[#1a1a1a] truncate">{user?.full_name || 'Usuario'}</p>
                <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-1">
                  {tags.map(tag => (
                    <button

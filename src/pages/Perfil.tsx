@@ -21,23 +21,45 @@ export function Perfil() {
   const [contentDetails, setContentDetails] = useState<Record<string, any>>({});
   const [showFavorites, setShowFavorites] = useState(false);
   const [showWatched, setShowWatched] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(user?.full_name || '');
+  const [editAvatarColor, setEditAvatarColor] = useState(user?.avatar_url || 'bg-[#8aaa1f]');
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const avatarColors = [
+    { name: 'Verde Lima', class: 'bg-[#8aaa1f]' },
+    { name: 'Verde Bosque', class: 'bg-[#477d1e]' },
+    { name: 'Azul Suave', class: 'bg-[#8ba8d1]' },
+    { name: 'Coral', class: 'bg-[#f0a3a3]' },
+    { name: 'Dorado', class: 'bg-[#d4af37]' },
+    { name: 'Púrpura', class: 'bg-[#a38bd1]' },
+  ];
 
   // Load accessibility settings from profile
   useEffect(() => {
     if (user?.accessibility) {
-      if (user.accessibility.highContrast !== undefined) {
+      if (user.accessibility.highContrast !== undefined && user.accessibility.highContrast !== highContrast) {
         setHighContrast(user.accessibility.highContrast);
       }
-      if (user.accessibility.largeText !== undefined) {
+      if (user.accessibility.largeText !== undefined && user.accessibility.largeText !== largeText) {
         setLargeText(user.accessibility.largeText);
       }
     }
-  }, [user]);
+  }, [user?.accessibility]);
 
   // Save accessibility settings to profile when they change
   useEffect(() => {
     const saveAccessibilitySettings = async () => {
       if (!user?.id) return;
+
+      // Only save if different from current user object to avoid loops
+      const currentHighContrast = user.accessibility?.highContrast ?? false;
+      const currentLargeText = user.accessibility?.largeText ?? true;
+
+      if (highContrast === currentHighContrast && largeText === currentLargeText) {
+        return;
+      }
 
       try {
         await supabase
@@ -50,12 +72,12 @@ export function Perfil() {
           })
           .eq('id', user.id);
       } catch (error) {
-        alert('Error al guardar configuración');
+        console.error('Error saving settings:', error);
       }
     };
 
     saveAccessibilitySettings();
-  }, [highContrast, largeText, user?.id]);
+  }, [highContrast, largeText, user?.id, user?.accessibility]);
 
   useEffect(() => {
     const fetchContentDetails = async () => {
@@ -88,229 +110,290 @@ export function Perfil() {
     navigate('/');
   };
 
+  const handleSaveProfile = async () => {
+    if (!user?.id) return;
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          full_name: editName,
+          avatar_url: editAvatarColor,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      
+      setIsEditing(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Error al actualizar el perfil. Verifica las políticas RLS en Supabase.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleUploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user?.id) return;
+
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      // 1. Subir imagen al Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // 2. Obtener URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // 3. Actualizar perfil con la nueva URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ 
+          avatar_url: publicUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      alert(`Error al cargar imagen: ${error.message || 'Verifica que el bucket "avatars" exista y sea público'}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login');
+    }
+  }, [user, loading, navigate]);
+
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-[#477d1e] animate-spin" />
+      <div className="min-h-[80vh] flex flex-col items-center justify-center gap-4">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-[#8aaa1f]/20 border-t-[#477d1e] rounded-full animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <User className="w-6 h-6 text-[#477d1e]" />
+          </div>
+        </div>
+        <p className="text-[#477d1e] font-bold animate-pulse">Cargando tu universo...</p>
       </div>
     );
   }
 
-  if (!user) {
-    navigate('/login');
-    return null;
-  }
+  if (!user) return null;
 
   const memberSince = user.created_at 
     ? new Date(user.created_at).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
     : 'Fecha desconocida';
 
   return (
-    <div className="py-6 sm:py-8 px-4 sm:px-6 space-y-8 sm:space-y-12 max-w-5xl mx-auto animate-fade-in-up">
-      {/* Header Profile */}
-      <div className="flex flex-col items-center text-center sm:text-left sm:flex-row sm:items-center sm:justify-between gap-6">
-        <div className="flex flex-col items-center sm:flex-row sm:items-center gap-4 sm:gap-6">
-          <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-[#8aaa1f] border-4 border-white shadow-md flex items-center justify-center">
-            <User className="w-10 h-10 sm:w-14 sm:h-14 text-[#477d1e]" />
-          </div>
-          <div>
-            <h1 className="text-2xl sm:text-4xl font-bold text-[#1a1a1a] mb-1 tracking-tight">{user.full_name || user.email?.split('@')[0] || 'Usuario'}</h1>
-            <p className="text-gray-500 font-medium text-sm sm:text-base">Miembro desde {memberSince}</p>
-          </div>
-        </div>
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-          <button className="flex-1 sm:flex-none justify-center bg-[#8aaa1f] hover:bg-[#b5d5bd] tracking-wide text-[#477d1e] px-5 sm:px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 transition-colors">
-            <Edit3 className="w-4 h-4" /> Editar Perfil
-          </button>
-          <button 
-            onClick={handleLogout}
-            className="flex-1 sm:flex-none justify-center bg-[#f0d4d4] hover:bg-[#e6c1c1] tracking-wide text-red-800 px-5 sm:px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 transition-colors"
-          >
-            <LogOut className="w-4 h-4" /> Cerrar Sesión
-          </button>
-        </div>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 items-start">
-        {/* Left Sidebar */}
-        <div className="w-full lg:w-80 space-y-6 flex-shrink-0">
-          <div className="bg-white border border-gray-100 shadow-sm rounded-3xl p-5 sm:p-8">
-            <h3 className="flex items-center gap-3 font-bold text-base sm:text-lg mb-6 sm:mb-8 text-[#1a1a1a]">
-              <User className="w-5 h-5 text-[#477d1e] fill-current" /> Datos Personales
-            </h3>
-            
-            <div className="space-y-4 sm:space-y-6">
-              <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Email</p>
-                <p className="font-medium text-sm text-[#1a1a1a] break-all">{user.email}</p>
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Nombre</p>
-                <p className="font-medium text-sm text-[#1a1a1a]">{user.full_name || 'No especificado'}</p>
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Rol</p>
+    <div className="min-h-screen pb-20">
+      {/* Hero Background Decoration */}
+      <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#f0f9eb] to-white -z-10 opacity-70" />
+      
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 space-y-12">
+        {/* Profile Header Card */}
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-[#8aaa1f] to-[#477d1e] rounded-[2.5rem] blur opacity-10 group-hover:opacity-20 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative bg-white/80 backdrop-blur-xl border border-white rounded-[2.5rem] p-6 sm:p-10 shadow-2xl shadow-[#477d1e]/5">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+              {/* Avatar Section */}
+              <div className="relative">
                 <div className={cn(
-                  "flex items-center gap-2 text-[10px] font-black uppercase px-3 py-1.5 rounded-full w-fit",
-                  user.role === 'super_admin' ? "bg-purple-100 text-purple-900" :
-                  user.role === 'admin' ? "bg-blue-100 text-blue-900" :
-                  user.role === 'premium' ? "bg-green-100 text-green-900" :
-                  "bg-gray-100 text-gray-700"
+                  "w-32 h-32 sm:w-40 sm:h-40 rounded-3xl shadow-2xl flex items-center justify-center transition-transform duration-500 hover:scale-105 overflow-hidden",
+                  user.avatar_url?.startsWith('bg-') ? user.avatar_url : 'bg-gradient-to-br from-[#8aaa1f] to-[#477d1e]'
                 )}>
-                  {user.role === 'super_admin' && <Crown className="w-3 h-3" />}
-                  {user.role || 'user'}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Suscripción / Membresía */}
-          <div className="bg-gradient-to-br from-[#477d1e] to-[#477d1e] rounded-3xl p-5 sm:p-8 text-white shadow-lg">
-            <h3 className="flex items-center gap-3 font-bold text-base sm:text-lg mb-6 sm:mb-8">
-              <Crown className="w-5 h-5" /> Mi Membresía
-            </h3>
-            
-            {subscriptionLoading ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="w-6 h-6 animate-spin" />
-              </div>
-            ) : subscription ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium opacity-90">Estado</span>
-                  <span className={cn(
-                    "text-xs font-bold uppercase px-2 py-1 rounded-full",
-                    subscription.status === 'active' ? "bg-green-400 text-green-900" :
-                    subscription.status === 'cancelled' ? "bg-red-400 text-red-900" :
-                    "bg-yellow-400 text-yellow-900"
-                  )}>
-                    {subscription.status === 'active' ? 'Activa' :
-                     subscription.status === 'cancelled' ? 'Cancelada' :
-                     subscription.status}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium opacity-90">Plan ID</span>
-                  <span className="text-xs font-mono opacity-75">{subscription.plan_id}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium opacity-90">Inicio</span>
-                  <span className="text-xs opacity-75">{new Date(subscription.start_date).toLocaleDateString('es-ES')}</span>
-                </div>
-                {subscription.end_date && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium opacity-90">Fin</span>
-                    <span className="text-xs opacity-75">{new Date(subscription.end_date).toLocaleDateString('es-ES')}</span>
-                  </div>
-                )}
-                <div className="flex items-center justify-between pt-2 border-t border-white/20">
-                  <span className="text-sm font-medium opacity-90">Renovación</span>
-                  {subscription.auto_renew ? (
-                    <span className="flex items-center gap-1 text-xs font-medium text-green-300">
-                      <Check className="w-3 h-3" /> Activada
-                    </span>
+                  {user.avatar_url && !user.avatar_url.startsWith('bg-') ? (
+                    <img src={user.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="flex items-center gap-1 text-xs font-medium text-red-300">
-                      <X className="w-3 h-3" /> Desactivada
-                    </span>
+                    <User className="w-16 h-16 sm:w-20 sm:h-20 text-white/90 drop-shadow-lg" />
+                  )}
+                  
+                  {isUploading && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm">
+                      <Loader2 className="w-8 h-8 text-white animate-spin" />
+                    </div>
                   )}
                 </div>
+                
+                {/* Botón de subida de archivo */}
+                <label className="absolute -bottom-2 -right-2 bg-white text-[#477d1e] p-3 rounded-2xl shadow-xl hover:scale-110 transition-transform border border-gray-100 cursor-pointer">
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={handleUploadAvatar}
+                    disabled={isUploading}
+                  />
+                  <Edit3 className="w-5 h-5" />
+                </label>
               </div>
-            ) : (
-              <div className="text-center py-4">
-                <CreditCard className="w-8 h-8 mx-auto mb-2 opacity-75" />
-                <p className="text-sm font-medium opacity-90 mb-3">Sin suscripción activa</p>
-                <button onClick={() => navigate('/planes')} className="bg-white text-[#477d1e] px-4 py-2 rounded-full text-xs font-bold hover:bg-[#8aaa1f] transition-colors">
-                  Ver Planes
-                </button>
-              </div>
-            )}
-          </div>
 
-          <div className="bg-[#f5f5f5] rounded-3xl p-5 sm:p-8">
-            <h3 className="flex items-center gap-3 font-bold text-base sm:text-lg mb-6 sm:mb-8 text-[#1a1a1a]">
-              <Eye className="w-5 h-5 text-[#477d1e] fill-current" /> Accesibilidad
-            </h3>
-            
-            <div className="space-y-4 sm:space-y-6">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">Texto Grande</span>
-                <button onClick={() => setLargeText(!largeText)} className={cn("w-12 h-6 rounded-full transition-colors relative", largeText ? "bg-[#477d1e]" : "bg-gray-300")}>
-                  <div className={cn("w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all shadow", largeText ? "left-6" : "left-0.5")} />
-                </button>
+              {/* Info Section */}
+              <div className="flex-1 text-center md:text-left space-y-4">
+                <div className="space-y-2">
+                  <div className="flex flex-col md:flex-row md:items-center gap-3">
+                    <h1 className="text-3xl sm:text-5xl font-black text-[#1a1a1a] tracking-tight">
+                      {user.full_name || 'Usuario'}
+                    </h1>
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider mx-auto md:mx-0",
+                      user.role === 'super_admin' ? "bg-purple-500 text-white shadow-lg shadow-purple-200" :
+                      user.role === 'admin' ? "bg-blue-500 text-white shadow-lg shadow-blue-200" :
+                      user.role === 'premium' ? "bg-[#477d1e] text-white shadow-lg shadow-green-200" :
+                      "bg-gray-100 text-gray-500"
+                    )}>
+                      {user.role === 'super_admin' && <Crown className="w-3 h-3 fill-current" />}
+                      {user.role === 'premium' && <Crown className="w-3 h-3 fill-current" />}
+                      {user.role || 'Miembro'}
+                    </div>
+                  </div>
+                  <p className="text-gray-400 font-medium flex items-center justify-center md:justify-start gap-2">
+                    <Bookmark className="w-4 h-4 text-[#8aaa1f]" />
+                    Miembro desde <span className="text-[#477d1e] font-bold">{memberSince}</span>
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
+                  <button 
+                    onClick={() => {
+                      setEditName(user.full_name || '');
+                      setEditAvatarColor(user.avatar_url || 'bg-[#8aaa1f]');
+                      setIsEditing(true);
+                    }}
+                    className="bg-[#477d1e] text-white px-8 py-4 rounded-2xl font-bold text-sm hover:bg-[#3a6618] transition-all hover:shadow-xl hover:shadow-[#477d1e]/20 active:scale-95 flex items-center gap-2"
+                  >
+                    <Edit3 className="w-4 h-4" /> Configurar Perfil
+                  </button>
+                  <button 
+                    onClick={handleLogout}
+                    className="bg-red-50 text-red-600 px-8 py-4 rounded-2xl font-bold text-sm hover:bg-red-100 transition-all active:scale-95 flex items-center gap-2"
+                  >
+                    <LogOut className="w-4 h-4" /> Salir
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">Alto Contraste</span>
-                <button onClick={() => setHighContrast(!highContrast)} className={cn("w-12 h-6 rounded-full transition-colors relative", highContrast ? "bg-[#477d1e]" : "bg-gray-300")}>
-                  <div className={cn("w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all shadow", highContrast ? "left-6" : "left-0.5")} />
-                </button>
+
+              {/* Stats Highlights */}
+              <div className="hidden lg:grid grid-cols-2 gap-4">
+                <div className="bg-[#f0f9eb] p-6 rounded-[2rem] border border-[#8aaa1f]/10 text-center space-y-1">
+                  <span className="text-3xl font-black text-[#477d1e] block">{favoritesCount}</span>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Favoritos</span>
+                </div>
+                <div className="bg-blue-50 p-6 rounded-[2rem] border border-blue-100 text-center space-y-1">
+                  <span className="text-3xl font-black text-blue-600 block">{communityStatsLoading ? '...' : communityStats.likesGiven + communityStats.postsCreated}</span>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Social</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Main content right */}
-        <div className="flex-1 space-y-8 sm:space-y-12 w-full">
-          {/* Mi Progreso */}
-          <section>
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-[#1a1a1a]">Mi Progreso</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        {/* Bento Grid Layout for Sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Main Content (Left/Center) */}
+          <div className="lg:col-span-8 space-y-8">
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div
                 onClick={() => setShowFavorites(!showFavorites)}
-                className="bg-white border border-gray-100 shadow-sm rounded-3xl p-4 sm:p-6 text-center cursor-pointer hover:shadow-md transition-all hover:border-[#477d1e]/30"
+                className="group bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-xl shadow-gray-200/50 cursor-pointer hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
               >
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#8aaa1f] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                  <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-[#477d1e] fill-current" />
+                <div className="flex items-start justify-between mb-6">
+                  <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Heart className="w-7 h-7 text-red-500 fill-current" />
+                  </div>
+                  <div className="px-3 py-1 bg-red-100 text-red-600 text-[10px] font-black rounded-full uppercase tracking-wider">
+                    {favoritesCount} ítems
+                  </div>
                 </div>
-                <h3 className="font-bold text-base sm:text-lg mb-2">Contenido Guardado</h3>
-                <p className="text-gray-500 text-xs sm:text-sm">Guarda tus videos y flyers preferidos</p>
-                <div className="mt-3 sm:mt-4 text-xl sm:text-2xl font-bold text-[#477d1e]">{favoritesCount}</div>
-                <p className="text-xs text-gray-400">Elementos guardados</p>
+                <h3 className="text-xl font-black text-[#1a1a1a] mb-2">Contenido Guardado</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">Tus videos, recetas y flyers favoritos organizados en un solo lugar.</p>
               </div>
 
               <div
                 onClick={() => setShowWatched(!showWatched)}
-                className="bg-white border border-gray-100 shadow-sm rounded-3xl p-4 sm:p-6 text-center cursor-pointer hover:shadow-md transition-all hover:border-[#477d1e]/30"
+                className="group bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-xl shadow-gray-200/50 cursor-pointer hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
               >
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#8aaa1f] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                  <MessageSquare className="w-6 h-6 sm:w-8 sm:h-8 text-[#477d1e]" />
+                <div className="flex items-start justify-between mb-6">
+                  <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <MessageSquare className="w-7 h-7 text-blue-500" />
+                  </div>
+                  <div className="px-3 py-1 bg-blue-100 text-blue-600 text-[10px] font-black rounded-full uppercase tracking-wider">
+                    {communityStatsLoading ? '...' : communityStats.postsCreated} posts
+                  </div>
                 </div>
-                <h3 className="font-bold text-base sm:text-lg mb-2">Mi Comunidad</h3>
-                <p className="text-gray-500 text-xs sm:text-sm">Likes, posts e interacción</p>
-                <div className="mt-3 sm:mt-4 text-xl sm:text-2xl font-bold text-[#477d1e]">{communityStatsLoading ? '...' : communityStats.likesGiven + communityStats.postsCreated}</div>
-                <p className="text-xs text-gray-400">Interacciones totales</p>
+                <h3 className="text-xl font-black text-[#1a1a1a] mb-2">Actividad Social</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">Tu impacto en la comunidad: posts, comentarios y likes compartidos.</p>
               </div>
             </div>
 
-            {/* Sección expandida de Contenido Guardado */}
+            {/* Expanded Content View (Animated) */}
             {showFavorites && (
-              <div className="mt-6 bg-white border border-gray-100 rounded-3xl p-6">
-                <h3 className="text-lg font-bold text-[#1a1a1a] mb-4">Todo tu Contenido Guardado</h3>
+              <div className="bg-white/50 backdrop-blur-md rounded-[3rem] p-8 border border-white shadow-2xl animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-2xl font-black text-[#1a1a1a] flex items-center gap-3">
+                    <Heart className="w-6 h-6 text-red-500" /> Mis Favoritos
+                  </h3>
+                  <button onClick={() => setShowFavorites(false)} className="text-gray-400 hover:text-gray-600">
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                
                 {favorites.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">No tienes contenido guardado aún.</p>
+                  <div className="text-center py-16 space-y-4">
+                    <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto">
+                      <Heart className="w-10 h-10 text-gray-200" />
+                    </div>
+                    <p className="text-gray-400 font-medium">Aún no has guardado contenido.</p>
+                  </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {favorites.map((fav) => {
                       const content = contentDetails[fav.content_id];
                       return (
                         <div
                           key={fav.id}
                           onClick={() => navigate(fav.content_type === 'video' ? '/videos' : '/flyers')}
-                          className="bg-gray-50 border border-gray-100 rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all hover:border-[#477d1e]/20"
+                          className="group relative bg-white rounded-3xl p-4 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
                         >
-                          <div className="flex items-center gap-3">
-                            <div className="w-16 h-16 bg-[#8aaa1f] rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          <div className="flex items-center gap-4">
+                            <div className="w-20 h-20 bg-[#f0f9eb] rounded-2xl overflow-hidden flex-shrink-0 relative">
                               {content?.thumbnail_url ? (
-                                <img src={content.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                                <img src={content.thumbnail_url} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                               ) : (
-                                <Heart className="w-6 h-6 text-[#477d1e] fill-current" />
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <Heart className="w-8 h-8 text-[#8aaa1f]/30" />
+                                </div>
                               )}
+                              <div className="absolute top-1 right-1 px-2 py-0.5 bg-black/50 backdrop-blur-md text-[8px] text-white font-bold rounded-full uppercase">
+                                {fav.content_type}
+                              </div>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs text-gray-400 mb-1">{fav.content_type === 'video' ? 'Video' : 'Flyer'}</p>
-                              <p className="font-bold text-sm text-[#1a1a1a] truncate">{content?.title || 'Sin título'}</p>
+                              <h4 className="font-bold text-[#1a1a1a] truncate group-hover:text-[#477d1e] transition-colors">{content?.title || 'Contenido Premium'}</h4>
+                              <p className="text-xs text-gray-400 font-medium">Nutriconfianza Exclusive</p>
+                              <div className="flex items-center gap-1 mt-2">
+                                <Eye className="w-3 h-3 text-[#8aaa1f]" />
+                                <span className="text-[10px] text-[#8aaa1f] font-bold">Ver ahora</span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -321,104 +404,220 @@ export function Perfil() {
               </div>
             )}
 
-            {/* Sección expandida de Comunidad */}
-            {showWatched && (
-              <div className="mt-6 bg-white border border-gray-100 rounded-3xl p-6">
-                <h3 className="text-lg font-bold text-[#1a1a1a] mb-4">Estadísticas de Comunidad</h3>
-                {communityStatsLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin text-[#477d1e]" />
+            {/* Recent History Section */}
+            {!showFavorites && !showWatched && (
+              <div className="space-y-6">
+                <h3 className="text-2xl font-black text-[#1a1a1a] px-2 flex items-center gap-3">
+                  <Eye className="w-6 h-6 text-[#477d1e]" /> Visto recientemente
+                </h3>
+                {watched.length === 0 ? (
+                  <div className="bg-white rounded-[2.5rem] p-12 text-center border border-dashed border-gray-200">
+                    <p className="text-gray-400 font-medium">Tu historial aparecerá aquí.</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-center">
-                      <div className="w-12 h-12 bg-[#8aaa1f] rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Heart className="w-6 h-6 text-[#477d1e] fill-current" />
-                      </div>
-                      <div className="text-2xl font-bold text-[#477d1e] mb-1">{communityStats.likesGiven}</div>
-                      <p className="text-xs text-gray-500">Likes dados</p>
-                    </div>
-                    <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-center">
-                      <div className="w-12 h-12 bg-[#8aaa1f] rounded-full flex items-center justify-center mx-auto mb-3">
-                        <MessageSquare className="w-6 h-6 text-[#477d1e]" />
-                      </div>
-                      <div className="text-2xl font-bold text-[#477d1e] mb-1">{communityStats.postsCreated}</div>
-                      <p className="text-xs text-gray-500">Posts creados</p>
-                    </div>
-                    <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-center">
-                      <div className="w-12 h-12 bg-[#f0d4d4] rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Bookmark className="w-6 h-6 text-[#477d1e]" />
-                      </div>
-                      <div className="text-2xl font-bold text-[#477d1e] mb-1">{communityStats.postsSaved}</div>
-                      <p className="text-xs text-gray-500">Posts guardados</p>
-                    </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {watched.slice(0, 4).map((w) => {
+                      const content = contentDetails[w.content_id];
+                      return (
+                        <div
+                          key={w.id}
+                          onClick={() => navigate(w.content_type === 'video' ? '/videos' : '/flyers')}
+                          className="bg-white/60 hover:bg-white rounded-[2rem] p-4 border border-white shadow-lg shadow-gray-100 hover:shadow-2xl transition-all duration-300 cursor-pointer"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center flex-shrink-0">
+                              {content?.thumbnail_url ? (
+                                <img src={content.thumbnail_url} alt="" className="w-full h-full object-cover rounded-2xl" />
+                              ) : (
+                                <Eye className="w-8 h-8 text-blue-200" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">{w.content_type}</p>
+                              <h4 className="font-bold text-sm text-[#1a1a1a] truncate">{content?.title || 'Cargando título...'}</h4>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
             )}
+          </div>
 
-            {/* Separador visual */}
-            <div className="border-t border-gray-200 my-6"></div>
+          {/* Side Panels (Right) */}
+          <div className="lg:col-span-4 space-y-8">
+            {/* Membership Card */}
+            <div className="relative overflow-hidden group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 via-[#477d1e] to-yellow-600 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+              <div className="relative bg-[#1a1a1a] rounded-[2.5rem] p-8 text-white shadow-2xl">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#477d1e]/20 blur-3xl -mr-16 -mt-16"></div>
+                <div className="relative z-10 space-y-8">
+                  <div className="flex items-center justify-between">
+                    <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                      <Crown className="w-6 h-6 text-yellow-400" />
+                    </div>
+                    <span className={cn(
+                      "text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full",
+                      subscription?.status === 'active' ? "bg-[#477d1e] text-white" : "bg-red-500/20 text-red-300"
+                    )}>
+                      {subscription?.status === 'active' ? 'Socio Activo' : 'Sin Membresía'}
+                    </span>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-2xl font-black mb-1">
+                      {subscription ? subscription.plan_id.charAt(0).toUpperCase() + subscription.plan_id.slice(1) : 'Plan Gratuito'}
+                    </h3>
+                    <p className="text-white/50 text-xs font-medium">Nutriconfianza Premium Experience</p>
+                  </div>
 
-            {/* Contenido Reciente */}
-            {(favorites.length > 0 || watched.length > 0) && (
-              <div>
-                <h3 className="text-lg font-bold text-[#1a1a1a] mb-4">Contenido Reciente</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {favorites.slice(0, 2).map((fav) => {
-                    const content = contentDetails[fav.content_id];
-                    return (
-                      <div
-                        key={fav.id}
-                        onClick={() => navigate(fav.content_type === 'video' ? '/videos' : '/flyers')}
-                        className="bg-white border border-gray-100 rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all hover:border-[#477d1e]/20"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-16 h-16 bg-[#8aaa1f] rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-                            {content?.thumbnail_url ? (
-                              <img src={content.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <Heart className="w-6 h-6 text-[#477d1e] fill-current" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-gray-400 mb-1">{fav.content_type === 'video' ? 'Video' : 'Flyer'}</p>
-                            <p className="font-bold text-sm text-[#1a1a1a] truncate">{content?.title || 'Sin título'}</p>
-                          </div>
-                        </div>
+                  {subscription ? (
+                    <div className="space-y-4 pt-4 border-t border-white/10">
+                      <div className="flex justify-between text-xs font-bold">
+                        <span className="text-white/40 uppercase tracking-widest">Renovación</span>
+                        <span className="text-yellow-400">{new Date(subscription.end_date || '').toLocaleDateString('es-ES')}</span>
                       </div>
-                    );
-                  })}
-                  {watched.slice(0, 2).map((w) => {
-                    const content = contentDetails[w.content_id];
-                    return (
-                      <div
-                        key={w.id}
-                        onClick={() => navigate(w.content_type === 'video' ? '/videos' : '/flyers')}
-                        className="bg-white border border-gray-100 rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all hover:border-[#477d1e]/20"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-16 h-16 bg-[#8aaa1f] rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-                            {content?.thumbnail_url ? (
-                              <img src={content.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <Eye className="w-6 h-6 text-[#477d1e]" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-gray-400 mb-1">{w.content_type === 'video' ? 'Video' : 'Flyer'}</p>
-                            <p className="font-bold text-sm text-[#1a1a1a] truncate">{content?.title || 'Sin título'}</p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      <button onClick={() => navigate('/planes')} className="w-full bg-white/5 hover:bg-white/10 text-white py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-colors border border-white/10">
+                        Gestionar Plan
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-6 pt-4 border-t border-white/10 text-center">
+                      <p className="text-sm text-white/60">Desbloquea el acceso ilimitado a todos los planes y videos.</p>
+                      <button onClick={() => navigate('/planes')} className="w-full bg-[#477d1e] hover:bg-[#8aaa1f] text-white py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-[#477d1e]/20 active:scale-95">
+                        Mejorar ahora
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
-          </section>
+            </div>
+
+            {/* Preferences / Accessibility */}
+            <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-xl shadow-gray-200/50 space-y-8">
+              <h3 className="text-xl font-black text-[#1a1a1a] flex items-center gap-3">
+                <Eye className="w-6 h-6 text-[#477d1e]" /> Preferencias
+              </h3>
+              
+              <div className="space-y-6">
+                <div className="group flex items-center justify-between p-2 rounded-2xl hover:bg-gray-50 transition-colors">
+                  <div className="space-y-0.5">
+                    <span className="text-sm font-bold text-gray-800">Modo Lectura</span>
+                    <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Texto más grande</p>
+                  </div>
+                  <button 
+                    onClick={() => setLargeText(!largeText)} 
+                    className={cn("w-14 h-7 rounded-full transition-all relative", largeText ? "bg-[#477d1e]" : "bg-gray-200")}
+                  >
+                    <div className={cn("w-5 h-5 bg-white rounded-full absolute top-1 transition-all shadow-md", largeText ? "left-8" : "left-1")} />
+                  </button>
+                </div>
+
+                <div className="group flex items-center justify-between p-2 rounded-2xl hover:bg-gray-50 transition-colors">
+                  <div className="space-y-0.5">
+                    <span className="text-sm font-bold text-gray-800">Alto Contraste</span>
+                    <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Para mejor visibilidad</p>
+                  </div>
+                  <button 
+                    onClick={() => setHighContrast(!highContrast)} 
+                    className={cn("w-14 h-7 rounded-full transition-all relative", highContrast ? "bg-[#477d1e]" : "bg-gray-200")}
+                  >
+                    <div className={cn("w-5 h-5 bg-white rounded-full absolute top-1 transition-all shadow-md", highContrast ? "left-8" : "left-1")} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Edit Profile Modal - Premium Redesign */}
+      {isEditing && (
+        <div className="fixed inset-0 bg-[#1a1a1a]/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[3rem] p-8 sm:p-12 max-w-xl w-full shadow-2xl shadow-black/20 animate-in zoom-in-95 duration-300 relative overflow-hidden">
+            {/* Modal Decorations */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#f0f9eb] rounded-full -mr-16 -mt-16 -z-10"></div>
+            
+            <div className="flex items-center justify-between mb-10">
+              <h2 className="text-3xl font-black text-[#1a1a1a] flex items-center gap-3">
+                <Edit3 className="w-8 h-8 text-[#477d1e]" /> Editar Perfil
+              </h2>
+              <button 
+                onClick={() => setIsEditing(false)}
+                className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-8">
+              {/* Name Input */}
+              <div className="space-y-3">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Nombre Público</label>
+                <div className="relative">
+                  <User className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                  <input 
+                    type="text" 
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="Tu nombre completo"
+                    className="w-full pl-14 pr-6 py-5 bg-gray-50 border-none rounded-[2rem] focus:ring-4 focus:ring-[#477d1e]/10 focus:bg-white transition-all text-lg font-bold text-[#1a1a1a] shadow-inner"
+                  />
+                </div>
+              </div>
+
+              {/* Avatar Color Selector */}
+              <div className="space-y-4">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Estilo de Avatar</label>
+                <div className="grid grid-cols-6 gap-3">
+                  {avatarColors.map((color) => (
+                    <button
+                      key={color.name}
+                      onClick={() => setEditAvatarColor(color.class)}
+                      className={cn(
+                        "w-12 h-12 rounded-2xl transition-all relative flex items-center justify-center shadow-lg",
+                        color.class,
+                        editAvatarColor === color.class ? "scale-110 ring-4 ring-[#477d1e]/20" : "hover:scale-105 opacity-80 hover:opacity-100"
+                      )}
+                      title={color.name}
+                    >
+                      {editAvatarColor === color.class && <Check className="w-6 h-6 text-white drop-shadow-md" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 pt-6">
+                <button 
+                  onClick={() => setIsEditing(false)}
+                  disabled={isSaving}
+                  className="flex-1 px-8 py-5 rounded-[2rem] font-black text-xs uppercase tracking-widest text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all disabled:opacity-30"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={handleSaveProfile}
+                  disabled={isSaving}
+                  className="flex-[2] bg-gradient-to-r from-[#8aaa1f] to-[#477d1e] text-white px-8 py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] hover:shadow-2xl hover:shadow-[#477d1e]/30 transition-all active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" /> Procesando...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-5 h-5" /> Guardar Cambios
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

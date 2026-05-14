@@ -11,6 +11,7 @@ export function Registro() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +21,9 @@ export function Registro() {
     if (result.error) {
       setError(result.error.message);
     } else {
-      navigate('/login');
+      setSuccess(true);
+      // Optional: scroll to top to see the message
+      window.scrollTo(0, 0);
     }
   };
 
@@ -49,65 +52,90 @@ export function Registro() {
                 {error}
               </div>
             )}
-            
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Nombre completo</label>
-                <div className="relative">
-                  <input 
-                    type="text" 
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                    placeholder="Juan Pérez"
-                    className="w-full bg-gray-50 border-none rounded-2xl p-5 pl-12 focus:ring-2 focus:ring-[#477d1e]/20 transition-all font-bold"
-                  />
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                </div>
-              </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Email</label>
-                <div className="relative">
-                  <input 
-                    type="email" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    placeholder="tu@email.com"
-                    className="w-full bg-gray-50 border-none rounded-2xl p-5 pl-12 focus:ring-2 focus:ring-[#477d1e]/20 transition-all font-bold"
-                  />
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            {success ? (
+              <div className="text-center py-8 space-y-6 animate-in fade-in zoom-in duration-500">
+                <div className="w-20 h-20 bg-[#f0f9eb] rounded-full flex items-center justify-center mx-auto shadow-lg shadow-[#8aaa1f]/20">
+                  <Mail className="w-10 h-10 text-[#477d1e]" />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Contraseña</label>
-                <div className="relative">
-                  <input 
-                    type="password" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    placeholder="Mínimo 6 caracteres"
-                    className="w-full bg-gray-50 border-none rounded-2xl p-5 pl-12 focus:ring-2 focus:ring-[#477d1e]/20 transition-all font-bold"
-                  />
-                  <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-black text-[#1a1a1a]">¡Registro exitoso!</h3>
+                  <p className="text-gray-500 font-medium">
+                    Hemos enviado un mensaje de confirmación a <span className="text-[#477d1e] font-bold">{email}</span>.
+                  </p>
                 </div>
+                <div className="bg-[#f0f9eb] p-6 rounded-3xl border border-[#8aaa1f]/10">
+                  <p className="text-xs text-[#477d1e] font-bold leading-relaxed">
+                    Por favor, revisa tu bandeja de entrada (y la carpeta de spam) para activar tu cuenta antes de iniciar sesión.
+                  </p>
+                </div>
+                <button 
+                  onClick={() => navigate('/login')}
+                  className="w-full py-5 bg-[#477d1e] text-white rounded-[2rem] font-black text-xs uppercase tracking-widest hover:shadow-2xl hover:shadow-[#477d1e]/30 transition-all active:scale-95"
+                >
+                  Ir al Inicio de Sesión
+                </button>
               </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Nombre completo</label>
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      placeholder="Juan Pérez"
+                      className="w-full bg-gray-50 border-none rounded-2xl p-5 pl-12 focus:ring-2 focus:ring-[#477d1e]/20 transition-all font-bold"
+                    />
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
 
-              <button 
-                type="submit"
-                disabled={loading}
-                className={cn(
-                  "w-full py-6 rounded-3xl font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-xl shadow-[#477d1e]/20 mt-6",
-                  loading ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-[#477d1e] hover:bg-[#477d1e] text-white hover:scale-[1.02] active:scale-[0.98]"
-                )}
-              >
-                {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Crear Cuenta"}
-              </button>
-            </form>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Email</label>
+                  <div className="relative">
+                    <input 
+                      type="email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      placeholder="tu@email.com"
+                      className="w-full bg-gray-50 border-none rounded-2xl p-5 pl-12 focus:ring-2 focus:ring-[#477d1e]/20 transition-all font-bold"
+                    />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Contraseña</label>
+                  <div className="relative">
+                    <input 
+                      type="password" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={6}
+                      placeholder="Mínimo 6 caracteres"
+                      className="w-full bg-gray-50 border-none rounded-2xl p-5 pl-12 focus:ring-2 focus:ring-[#477d1e]/20 transition-all font-bold"
+                    />
+                    <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+
+                <button 
+                  type="submit"
+                  disabled={loading}
+                  className={cn(
+                    "w-full py-6 rounded-3xl font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-xl shadow-[#477d1e]/20 mt-6",
+                    loading ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-[#477d1e] hover:bg-[#477d1e] text-white hover:scale-[1.02] active:scale-[0.98]"
+                  )}
+                >
+                  {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Crear Cuenta"}
+                </button>
+              </form>
+            )}
 
             <div className="mt-8 text-center">
               <p className="text-gray-500 text-sm font-medium">
