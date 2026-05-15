@@ -20,7 +20,7 @@ export const watchedService = {
         .select('id')
         .eq('user_id', userId)
         .eq('content_id', contentId)
-        .single();
+        .maybeSingle();
 
       if (existing) {
         // Update existing record
@@ -103,7 +103,7 @@ export const watchedService = {
         .select('id')
         .eq('user_id', userId)
         .eq('content_id', contentId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         if (error.code === 'PGRST116') {

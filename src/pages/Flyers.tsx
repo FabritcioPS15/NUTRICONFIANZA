@@ -1,5 +1,5 @@
 import { Bookmark, Loader2, Search, LayoutGrid, Activity, Heart, Apple, Dumbbell } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn, resolveMediaUrl } from '../lib/utils';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Flyer } from '../types';
@@ -53,7 +53,7 @@ export function Flyers() {
           title: f.title || "",
           desc: f.description || "",
           tag: f.category || "General",
-          img: f.media_url || "https://images.unsplash.com/photo-1543362906-acfc16c67564?auto=format&fit=crop&q=80&w=400",
+          img: f.media_url ? resolveMediaUrl(f.media_url) : "https://images.unsplash.com/photo-1543362906-acfc16c67564?auto=format&fit=crop&q=80&w=400",
           featured: false,
           saved: false,
           info: "PDF"

@@ -45,7 +45,7 @@ export const plansService = {
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (error) {
         return { subscription: null, error };
@@ -107,7 +107,7 @@ export const plansService = {
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (error) {
         return { nutritionPlan: null, error };

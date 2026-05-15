@@ -9,6 +9,7 @@ import {
   Link as LinkIcon
 } from 'lucide-react';
 import { supabase } from '../lib/supabase/client';
+import { getEmbedUrl, isEmbeddable } from '../lib/utils';
 
 export function EditVideo() {
   const navigate = useNavigate();
@@ -323,9 +324,9 @@ export function EditVideo() {
                   Vista Previa
                 </label>
                 <div className="aspect-video bg-gray-100 rounded-2xl overflow-hidden">
-                  {mediaUrl.includes('youtube') || mediaUrl.includes('youtu.be') ? (
+                  {isEmbeddable(mediaUrl) ? (
                     <iframe 
-                      src={mediaUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                      src={getEmbedUrl(mediaUrl)}
                       className="w-full h-full"
                       allowFullScreen
                     />

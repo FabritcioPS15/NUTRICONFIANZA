@@ -1,6 +1,6 @@
 import { Plus, Heart, MessageSquare, Share2, MoreHorizontal, Dumbbell, Apple, Activity, Users, Bookmark, Loader2, LogIn, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { cn } from '../lib/utils';
+import { cn, getEmbedUrl, isEmbeddable } from '../lib/utils';
 import { Editor } from '../components/ui/Editor';
 import { Post } from '../types';
 import { supabase } from '../lib/supabase/client';
@@ -48,16 +48,6 @@ const INITIAL_POSTS = [
   }
 ];
 
-const getEmbedUrl = (url: string) => {
-  if (url.includes('youtube.com/watch?v=')) return url.replace('watch?v=', 'embed/');
-  if (url.includes('youtu.be/')) return url.replace('youtu.be/', 'youtube.com/embed/');
-  return url;
-};
-
-const isIframeable = (url: string) => {
-  if (!url) return false;
-  return url.includes('youtube.com') || url.includes('youtu.be') || url.includes('tiktok.com');
-};
 
 export function Comunidad() {
   const { user } = useAuth();
@@ -399,7 +389,7 @@ export function Comunidad() {
 
               {post.img && (
                 <div className="rounded-2xl overflow-hidden mb-6 bg-gray-50 flex items-center justify-center aspect-video">
-                  {isIframeable(post.img) ? (
+                  {isEmbeddable(post.img) ? (
                     <iframe
                       src={getEmbedUrl(post.img)}
                       className="w-full h-full border-none"
