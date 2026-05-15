@@ -198,7 +198,7 @@ export function EditVideo() {
               </label>
               <input
                 type="text"
-                value={title}
+                value={title || ''}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 focus:ring-2 focus:ring-[#477d1e]/20 focus:border-[#477d1e] transition-all outline-none"
                 placeholder="Título del video"
@@ -212,7 +212,7 @@ export function EditVideo() {
               </label>
               <input
                 type="text"
-                value={authorName}
+                value={authorName || ''}
                 onChange={(e) => setAuthorName(e.target.value)}
                 className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 focus:ring-2 focus:ring-[#477d1e]/20 focus:border-[#477d1e] transition-all outline-none"
                 placeholder="Nombre del autor"
@@ -225,7 +225,7 @@ export function EditVideo() {
                 Categoría
               </label>
               <select
-                value={category}
+                value={category || ''}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 focus:ring-2 focus:ring-[#477d1e]/20 focus:border-[#477d1e] transition-all outline-none"
               >
@@ -307,7 +307,7 @@ export function EditVideo() {
                 <div className="relative">
                   <input
                     type="text"
-                    value={mediaUrl}
+                    value={mediaUrl || ''}
                     onChange={(e) => setMediaUrl(e.target.value)}
                     className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 pl-12 pr-4 focus:ring-2 focus:ring-[#477d1e]/20 focus:border-[#477d1e] transition-all outline-none"
                     placeholder="Pega el link de YouTube, TikTok, etc."
